@@ -1,0 +1,420 @@
+{
+  "title": "Database Schema Specification",
+  "description": "Standardized JSON schema specification for database structure definition and validation. Provides a consistent format for representing database schemas across applications with built-in validation rules",
+  "type": "object",
+  "properties": {
+    "database": {
+      "type": "object",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "description": "The type of database engine used",
+          "enum": ["PostgreSQL"]
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the database engine",
+          "enum": ["15"]
+        }
+      },
+      "required": ["engine", "version"]
+    },
+    "schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the schema",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the schema",
+          "examples": [
+            "E-commerce Platform",
+            "Inventory Management System",
+            "Customer Relationship Management",
+            "Financial Management System",
+            "Human Resources Portal"
+          ]
+        },
+        "snapshot": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "description": "Label for the snapshot",
+              "examples": ["v1.0.0", "v1.1.0", "v2.0.0"]
+            },
+            "description": {
+              "type": ["string", "null"],
+              "description": "Description of the snapshot",
+              "examples": [
+                "Initial schema setup",
+                "Added new tables",
+                "Updated column types"
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Timestamp when the snapshot was created",
+              "examples": ["2023-10-01T12:00:00", "2023-10-02T15:30:00"]
+            }
+          },
+          "required": ["label", "description", "created_at"],
+          "additionalProperties": false
+        },
+        "tables": {
+          "type": "array",
+          "description": "List of tables in the schema",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Name of the table",
+                "examples": [
+                  "users",
+                  "orders",
+                  "products",
+                  "user_profiles",
+                  "order_items"
+                ]
+              },
+              "description": {
+                "type": "string",
+                "description": "Description of the table",
+                "examples": [
+                  "Table containing user information and authentication data",
+                  "Table for storing order details and transaction history",
+                  "Table for product listings and inventory management",
+                  "Table containing supplier information with strict validation constraints",
+                  "Physical warehouse locations with capacity constraints",
+                  "Current inventory levels per warehouse with movement tracking"
+                ]
+              },
+              "columns": {
+                "type": "array",
+                "description": "List of columns in the table",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the column",
+                      "examples": [
+                        "id",
+                        "username",
+                        "email",
+                        "created_at",
+                        "supplier_code",
+                        "company_name",
+                        "credit_limit",
+                        "warehouse_code",
+                        "capacity_cubic_meters",
+                        "temperature_min",
+                        "category_code",
+                        "sku",
+                        "unit_cost_cents",
+                        "weight_grams",
+                        "length_mm",
+                        "shelf_life_days",
+                        "quantity_on_hand",
+                        "bin_location"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Data type of the column",
+                      "enum": [
+                        "integer",
+                        "string",
+                        "boolean",
+                        "date",
+                        "timestamp",
+                        "text",
+                        "serial"
+                      ]
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description of the column",
+                      "examples": [
+                        "Primary key",
+                        "Username of the user",
+                        "Email address",
+                        "Creation timestamp",
+                        "Unique supplier identification code",
+                        "Official company name of the supplier",
+                        "Maximum credit limit in cents",
+                        "Unique warehouse identification code",
+                        "Total storage capacity in cubic meters",
+                        "Minimum temperature in Celsius",
+                        "Stock Keeping Unit - unique product identifier",
+                        "Unit cost in cents",
+                        "Product weight in grams",
+                        "Product length in millimeters",
+                        "Product shelf life in days (null for non-perishable)",
+                        "Current quantity available",
+                        "Specific bin/shelf location in warehouse"
+                      ]
+                    },
+                    "default": {
+                      "type": ["string", "number", "boolean", "null"],
+                      "description": "Default value for the column",
+                      "examples": [
+                        12,
+                        "default value",
+                        true,
+                        "current_timestamp",
+                        "current_date",
+                        null
+                      ]
+                    },
+                    "constraints": {
+                      "type": "object",
+                      "description": "Constraints applied to the column",
+                      "properties": {
+                        "nullable": {
+                          "type": "boolean",
+                          "description": "Whether the column can be null",
+                          "default": true
+                        },
+                        "unique": {
+                          "type": "boolean",
+                          "description": "Whether the column must have unique values",
+                          "default": false
+                        },
+                        "primary_key": {
+                          "type": "boolean",
+                          "description": "Whether the column is a primary key",
+                          "default": false
+                        },
+                        "min_length": {
+                          "type": "number",
+                          "description": "Minimum length for string columns"
+                        },
+                        "max_length": {
+                          "type": "number",
+                          "description": "Maximum length for string columns"
+                        },
+                        "min_value": {
+                          "type": "number",
+                          "description": "Minimum value for numeric columns"
+                        },
+                        "max_value": {
+                          "type": "number",
+                          "description": "Maximum value for numeric columns"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": ["name", "type"],
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "length": {
+                            "type": "number",
+                            "description": "Length parameter for string types like VARCHAR(n). When specified, max_length constraint should not be used as they are redundant.",
+                            "examples": [255, 100, 50]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "string"
+                          },
+                          "length": {
+                            "type": "number"
+                          }
+                        },
+                        "required": ["type", "length"]
+                      },
+                      "then": {
+                        "properties": {
+                          "constraints": {
+                            "properties": {
+                              "max_length": false
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "default": {
+                            "const": null
+                          }
+                        },
+                        "required": ["default"]
+                      },
+                      "then": {
+                        "properties": {
+                          "constraints": {
+                            "properties": {
+                              "nullable": false
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "constraints": {
+                "type": "array",
+                "description": "List of constraints applied to the table",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Name of the constraint",
+                      "examples": [
+                        "fk_users_parent",
+                        "unique_full_name",
+                        "fk_parent_category",
+                        "fk_product_category",
+                        "fk_product_supplier",
+                        "unique_product_warehouse",
+                        "fk_inventory_product",
+                        "fk_inventory_warehouse",
+                        "fk_orders_user",
+                        "fk_order_items_order",
+                        "unique_order_product"
+                      ]
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Type of the constraint",
+                      "enum": ["foreign_key", "unique"]
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Description of the constraint",
+                      "examples": [
+                        "Self-referencing foreign key to create user hierarchy",
+                        "Ensure combination of first and last name is unique",
+                        "Self-referencing foreign key for category hierarchy",
+                        "Foreign key to product categories table",
+                        "Foreign key to suppliers table",
+                        "Each product can only have one inventory record per warehouse",
+                        "Foreign key to products table",
+                        "Foreign key to warehouses table",
+                        "Foreign key to users table",
+                        "Foreign key to orders table",
+                        "Ensure each product appears only once per order"
+                      ]
+                    },
+                    "columns": {
+                      "type": "array",
+                      "description": "List of column names that this constraint applies to",
+                      "items": {
+                        "type": "string"
+                      },
+                      "examples": [["parent_id"], ["first_name", "last_name"]]
+                    }
+                  },
+                  "required": ["name", "type", "columns"],
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "foreign_key"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "references": {
+                            "type": "object",
+                            "description": "Table and column that this foreign key references",
+                            "properties": {
+                              "table": {
+                                "type": "string",
+                                "description": "Name of the referenced table",
+                                "examples": ["users", "orders", "products"]
+                              },
+                              "column": {
+                                "type": "string",
+                                "description": "Name of the referenced column",
+                                "examples": ["id", "user_id", "product_id"]
+                              }
+                            },
+                            "required": ["table", "column"],
+                            "additionalProperties": false
+                          },
+                          "on_delete": {
+                            "type": "string",
+                            "description": "Action to take when referenced row is deleted",
+                            "enum": [
+                              "cascade",
+                              "set_null",
+                              "set_default",
+                              "restrict",
+                              "no_action"
+                            ],
+                            "examples": ["cascade", "set_null", "restrict"]
+                          },
+                          "on_update": {
+                            "type": "string",
+                            "description": "Action to take when referenced row is updated",
+                            "enum": [
+                              "cascade",
+                              "set_null",
+                              "set_default",
+                              "restrict",
+                              "no_action"
+                            ],
+                            "examples": ["cascade", "set_null", "restrict"]
+                          }
+                        },
+                        "required": ["references"],
+                        "additionalProperties": false
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "type": {
+                            "const": "unique"
+                          }
+                        }
+                      },
+                      "then": {
+                        "additionalProperties": false
+                      }
+                    }
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": ["name", "columns"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["id", "name", "snapshot", "tables"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["database", "schema"],
+  "additionalProperties": false
+}

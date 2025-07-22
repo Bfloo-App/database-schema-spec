@@ -1,0 +1,514 @@
+{
+  "database": {
+    "engine": "PostgreSQL",
+    "version": "15"
+  },
+  "schema": {
+    "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+    "name": "Healthcare Management System",
+    "snapshot": {
+      "label": "v3.2.1",
+      "description": "Comprehensive healthcare management with patient records and appointments",
+      "created_at": "2024-05-15T09:20:00"
+    },
+    "tables": [
+      {
+        "name": "patients",
+        "description": "Patient information and medical records",
+        "columns": [
+          {
+            "name": "id",
+            "type": "serial",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "name": "patient_number",
+            "type": "string",
+            "length": 12,
+            "constraints": {
+              "nullable": false,
+              "unique": true
+            }
+          },
+          {
+            "name": "first_name",
+            "type": "string",
+            "length": 80,
+            "constraints": {
+              "nullable": false,
+              "min_length": 1
+            }
+          },
+          {
+            "name": "last_name",
+            "type": "string",
+            "length": 80,
+            "constraints": {
+              "nullable": false,
+              "min_length": 1
+            }
+          },
+          {
+            "name": "date_of_birth",
+            "type": "date",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "gender",
+            "type": "string",
+            "length": 10,
+            "default": null
+          },
+          {
+            "name": "phone",
+            "type": "string",
+            "length": 15,
+            "default": null,
+            "constraints": {
+              "min_length": 10
+            }
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "length": 150
+          },
+          {
+            "name": "emergency_contact",
+            "type": "string",
+            "length": 100,
+            "default": null
+          },
+          {
+            "name": "blood_type",
+            "type": "string",
+            "length": 5,
+            "default": null
+          },
+          {
+            "name": "is_active",
+            "type": "boolean",
+            "default": true,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "registered_at",
+            "type": "timestamp",
+            "default": "current_timestamp",
+            "constraints": {
+              "nullable": false
+            }
+          }
+        ]
+      },
+      {
+        "name": "doctors",
+        "columns": [
+          {
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the doctor",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "name": "license_number",
+            "type": "string",
+            "length": 20,
+            "description": "Medical license number",
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": 5
+            }
+          },
+          {
+            "name": "first_name",
+            "type": "string",
+            "length": 80,
+            "constraints": {
+              "nullable": false,
+              "min_length": 1
+            }
+          },
+          {
+            "name": "last_name",
+            "type": "string",
+            "length": 80,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "specialization",
+            "type": "string",
+            "length": 100,
+            "constraints": {
+              "nullable": false,
+              "min_length": 2
+            }
+          },
+          {
+            "name": "phone",
+            "type": "string",
+            "length": 15,
+            "constraints": {
+              "min_length": 10
+            }
+          },
+          {
+            "name": "office_room",
+            "type": "string",
+            "length": 10,
+            "default": null
+          },
+          {
+            "name": "years_experience",
+            "type": "integer",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": 0,
+              "max_value": 60
+            }
+          },
+          {
+            "name": "consultation_fee_cents",
+            "type": "integer",
+            "constraints": {
+              "nullable": false,
+              "min_value": 0,
+              "max_value": 100000
+            }
+          },
+          {
+            "name": "is_accepting_patients",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "name": "joined_at",
+            "type": "date",
+            "default": "current_date",
+            "constraints": {
+              "nullable": false
+            }
+          }
+        ],
+        "constraints": []
+      },
+      {
+        "name": "departments",
+        "description": "Hospital departments and their information",
+        "columns": [
+          {
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the department",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "name": "name",
+            "type": "string",
+            "length": 100,
+            "description": "Department name",
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": 2
+            }
+          },
+          {
+            "name": "code",
+            "type": "string",
+            "length": 10,
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": 2
+            }
+          },
+          {
+            "name": "head_doctor_id",
+            "type": "integer",
+            "default": null
+          },
+          {
+            "name": "floor_number",
+            "type": "integer",
+            "constraints": {
+              "nullable": false,
+              "min_value": 1,
+              "max_value": 20
+            }
+          },
+          {
+            "name": "extension",
+            "type": "string",
+            "length": 6,
+            "default": null
+          },
+          {
+            "name": "budget_cents",
+            "type": "integer",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": 0
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "name": "fk_department_head_doctor",
+            "type": "foreign_key",
+            "description": "Foreign key to doctors table for department head",
+            "columns": ["head_doctor_id"],
+            "references": {
+              "table": "doctors",
+              "column": "id"
+            },
+            "on_delete": "set_null",
+            "on_update": "cascade"
+          }
+        ]
+      },
+      {
+        "name": "appointments",
+        "description": "Patient appointments with doctors",
+        "columns": [
+          {
+            "name": "id",
+            "type": "serial",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "name": "patient_id",
+            "type": "integer",
+            "description": "Reference to patient",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "doctor_id",
+            "type": "integer",
+            "description": "Reference to doctor",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "appointment_date",
+            "type": "date",
+            "description": "Date of the appointment",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "appointment_time",
+            "type": "string",
+            "length": 8,
+            "description": "Time of appointment in HH:MM format",
+            "constraints": {
+              "nullable": false,
+              "min_length": 5
+            }
+          },
+          {
+            "name": "duration_minutes",
+            "type": "integer",
+            "default": 30,
+            "constraints": {
+              "nullable": false,
+              "min_value": 15,
+              "max_value": 180
+            }
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "length": 20,
+            "default": "scheduled",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "notes",
+            "type": "text",
+            "default": null
+          },
+          {
+            "name": "fee_charged_cents",
+            "type": "integer",
+            "default": null,
+            "constraints": {
+              "min_value": 0
+            }
+          },
+          {
+            "name": "created_at",
+            "type": "timestamp",
+            "default": "current_timestamp"
+          },
+          {
+            "name": "updated_at",
+            "type": "timestamp",
+            "default": "current_timestamp",
+            "constraints": {
+              "nullable": false
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "name": "fk_appointment_patient",
+            "type": "foreign_key",
+            "columns": ["patient_id"],
+            "references": {
+              "table": "patients",
+              "column": "id"
+            },
+            "on_delete": "cascade"
+          },
+          {
+            "name": "fk_appointment_doctor",
+            "type": "foreign_key",
+            "description": "Foreign key to doctors table",
+            "columns": ["doctor_id"],
+            "references": {
+              "table": "doctors",
+              "column": "id"
+            },
+            "on_delete": "restrict",
+            "on_update": "cascade"
+          },
+          {
+            "name": "unique_doctor_datetime",
+            "type": "unique",
+            "description": "Prevent double-booking of doctors",
+            "columns": ["doctor_id", "appointment_date", "appointment_time"]
+          }
+        ]
+      },
+      {
+        "name": "medical_records",
+        "columns": [
+          {
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the medical record",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "name": "patient_id",
+            "type": "integer",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "doctor_id",
+            "type": "integer",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "visit_date",
+            "type": "date",
+            "default": "current_date",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "diagnosis",
+            "type": "text",
+            "constraints": {
+              "nullable": false,
+              "min_length": 5
+            }
+          },
+          {
+            "name": "treatment",
+            "type": "text",
+            "default": null
+          },
+          {
+            "name": "prescription",
+            "type": "text",
+            "default": null
+          },
+          {
+            "name": "follow_up_required",
+            "type": "boolean",
+            "default": false,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "name": "follow_up_date",
+            "type": "date",
+            "default": null
+          },
+          {
+            "name": "severity_level",
+            "type": "integer",
+            "default": 1,
+            "constraints": {
+              "nullable": false,
+              "min_value": 1,
+              "max_value": 5
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "name": "fk_record_patient",
+            "type": "foreign_key",
+            "description": "Foreign key to patients table",
+            "columns": ["patient_id"],
+            "references": {
+              "table": "patients",
+              "column": "id"
+            },
+            "on_delete": "cascade",
+            "on_update": "cascade"
+          },
+          {
+            "name": "fk_record_doctor",
+            "type": "foreign_key",
+            "columns": ["doctor_id"],
+            "references": {
+              "table": "doctors",
+              "column": "id"
+            },
+            "on_delete": "restrict"
+          }
+        ]
+      }
+    ]
+  }
+}
