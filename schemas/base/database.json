@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.bfloo.com/database-schema-spec/v1/schemas/base/database.json",
+  "title": "Database Configuration",
+  "type": "object",
+  "required": ["engine", "version"],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "engine": {
+          "type": "string",
+          "description": "The type of database engine used",
+          "const": "PostgreSQL"
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the PostgreSQL database engine",
+          "enum": ["15.0"]
+        }
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "database": {
     "engine": "PostgreSQL",
-    "version": "15"
+    "version": "15.0"
   },
   "schema": {
     "id": "8a2e8f50-b29c-42d4-a817-556644330001",
