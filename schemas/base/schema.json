@@ -25,6 +25,15 @@
     "snapshot": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Unique identifier for the snapshot",
+          "examples": [
+            "123e4567-e89b-12d3-a456-426614174000",
+            "987fcdeb-51d2-43a1-b123-456789abcdef"
+          ]
+        },
         "label": {
           "type": "string",
           "description": "Label for the snapshot",
@@ -54,7 +63,7 @@
           "examples": ["2023-10-01T12:00:00", "2023-10-02T15:30:00"]
         }
       },
-      "required": ["label", "description", "parent_id", "created_at"],
+      "required": ["id", "label", "description", "parent_id", "created_at"],
       "additionalProperties": false
     },
     "tables": {
