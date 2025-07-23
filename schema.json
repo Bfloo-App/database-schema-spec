@@ -60,6 +60,12 @@
                 "Updated column types"
               ]
             },
+            "parent_id": {
+              "type": ["string", "null"],
+              "format": "uuid",
+              "description": "UUID of the parent snapshot this snapshot is based on. Null for initial snapshots.",
+              "examples": ["550e8400-e29b-41d4-a716-446655440000", null]
+            },
             "created_at": {
               "type": "string",
               "format": "date-time",
@@ -67,7 +73,7 @@
               "examples": ["2023-10-01T12:00:00", "2023-10-02T15:30:00"]
             }
           },
-          "required": ["label", "description", "created_at"],
+          "required": ["label", "description", "parent_id", "created_at"],
           "additionalProperties": false
         },
         "tables": {
@@ -107,7 +113,7 @@
                     "name": {
                       "type": "string",
                       "description": "Name of the table",
-                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                      "pattern": "^[a-z][a-z0-9_]*$",
                       "minLength": 1,
                       "maxLength": 63,
                       "examples": [
@@ -139,7 +145,7 @@
                           "name": {
                             "type": "string",
                             "description": "Name of the column",
-                            "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                            "pattern": "^[a-z][a-z0-9_]*$",
                             "minLength": 1,
                             "maxLength": 63,
                             "examples": [
@@ -254,7 +260,7 @@
                                         "name": {
                                           "type": "string",
                                           "description": "Name of the constraint",
-                                          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                                          "pattern": "^[a-z][a-z0-9_]*$",
                                           "minLength": 1,
                                           "maxLength": 63
                                         },
@@ -273,7 +279,7 @@
                                         "name": {
                                           "type": "string",
                                           "description": "Name of the constraint",
-                                          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                                          "pattern": "^[a-z][a-z0-9_]*$",
                                           "minLength": 1,
                                           "maxLength": 63
                                         },
@@ -309,7 +315,7 @@
                                         "name": {
                                           "type": "string",
                                           "description": "Name of the constraint",
-                                          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                                          "pattern": "^[a-z][a-z0-9_]*$",
                                           "minLength": 1,
                                           "maxLength": 63
                                         },
@@ -328,7 +334,7 @@
                                         "name": {
                                           "type": "string",
                                           "description": "Name of the constraint",
-                                          "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                                          "pattern": "^[a-z][a-z0-9_]*$",
                                           "minLength": 1,
                                           "maxLength": 63
                                         },
@@ -363,6 +369,211 @@
                                 }
                               }
                             }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "constraints": {
+                                  "properties": {
+                                    "nullable": {
+                                      "const": false
+                                    }
+                                  },
+                                  "required": ["nullable"]
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "default": {
+                                  "not": {
+                                    "const": null
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "boolean"
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "default": {
+                                  "oneOf": [
+                                    { "type": "boolean" },
+                                    { "const": null }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "enum": ["integer", "serial"]
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "default": {
+                                  "oneOf": [
+                                    { "type": "number" },
+                                    { "const": null }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "text"
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "default": {
+                                  "oneOf": [
+                                    { "type": "string" },
+                                    { "const": null }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "enum": ["date", "timestamp"]
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "default": {
+                                  "oneOf": [
+                                    {
+                                      "type": "string",
+                                      "enum": [
+                                        "current_date",
+                                        "current_timestamp"
+                                      ]
+                                    },
+                                    { "const": null }
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "type": {
+                                  "const": "serial"
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "default": false,
+                                "constraints": {
+                                  "properties": {
+                                    "nullable": false,
+                                    "unique": false
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "constraints": {
+                                  "properties": {
+                                    "primary_key": {
+                                      "const": true
+                                    }
+                                  },
+                                  "required": ["primary_key"]
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "constraints": {
+                                  "properties": {
+                                    "nullable": false,
+                                    "unique": false
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "constraints": {
+                                  "properties": {
+                                    "nullable": {
+                                      "const": true
+                                    }
+                                  },
+                                  "required": ["nullable"]
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "type": {
+                                  "not": {
+                                    "const": "serial"
+                                  }
+                                },
+                                "constraints": {
+                                  "properties": {
+                                    "primary_key": false
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          {
+                            "if": {
+                              "properties": {
+                                "constraints": {
+                                  "properties": {
+                                    "unique": {
+                                      "const": true
+                                    }
+                                  },
+                                  "required": ["unique"]
+                                }
+                              }
+                            },
+                            "then": {
+                              "properties": {
+                                "type": {
+                                  "not": {
+                                    "const": "serial"
+                                  }
+                                },
+                                "constraints": {
+                                  "properties": {
+                                    "primary_key": false
+                                  }
+                                }
+                              }
+                            }
                           }
                         ],
                         "additionalProperties": false
@@ -377,7 +588,7 @@
                           "name": {
                             "type": "string",
                             "description": "Name of the constraint",
-                            "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                            "pattern": "^[a-z][a-z0-9_]*$",
                             "minLength": 1,
                             "maxLength": 63,
                             "examples": [
@@ -447,7 +658,7 @@
                                     "table": {
                                       "type": "string",
                                       "description": "Name of the referenced table",
-                                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                                      "pattern": "^[a-z][a-z0-9_]*$",
                                       "minLength": 1,
                                       "maxLength": 63,
                                       "examples": [
@@ -459,7 +670,7 @@
                                     "column": {
                                       "type": "string",
                                       "description": "Name of the referenced column",
-                                      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$",
+                                      "pattern": "^[a-z][a-z0-9_]*$",
                                       "minLength": 1,
                                       "maxLength": 63,
                                       "examples": [

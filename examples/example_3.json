@@ -9,6 +9,7 @@
     "snapshot": {
       "label": "v3.2.1",
       "description": "Comprehensive healthcare management with patient records and appointments",
+      "parent_id": "8a2e8f50-b29c-42d4-a817-556644330001",
       "created_at": "2024-05-15T09:20:00"
     },
     "tables": [
@@ -26,29 +27,44 @@
           },
           {
             "name": "patient_number",
-            "type": "string",
-            "length": 12,
+            "type": "text",
             "constraints": {
               "nullable": false,
-              "unique": true
+              "unique": true,
+              "max_length": {
+                "name": "max_patient_number_length",
+                "value": 12
+              }
             }
           },
           {
             "name": "first_name",
-            "type": "string",
-            "length": 80,
+            "type": "text",
             "constraints": {
               "nullable": false,
-              "min_length": 1
+              "min_length": {
+                "name": "min_first_name_length",
+                "value": 1
+              },
+              "max_length": {
+                "name": "max_first_name_length",
+                "value": 80
+              }
             }
           },
           {
             "name": "last_name",
-            "type": "string",
-            "length": 80,
+            "type": "text",
             "constraints": {
               "nullable": false,
-              "min_length": 1
+              "min_length": {
+                "name": "min_last_name_length",
+                "value": 1
+              },
+              "max_length": {
+                "name": "max_last_name_length",
+                "value": 80
+              }
             }
           },
           {
@@ -60,35 +76,61 @@
           },
           {
             "name": "gender",
-            "type": "string",
-            "length": 10,
-            "default": null
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_gender_length",
+                "value": 10
+              }
+            }
           },
           {
             "name": "phone",
-            "type": "string",
-            "length": 15,
+            "type": "text",
             "default": null,
             "constraints": {
-              "min_length": 10
+              "min_length": {
+                "name": "min_phone_length",
+                "value": 10
+              },
+              "max_length": {
+                "name": "max_phone_length",
+                "value": 15
+              }
             }
           },
           {
             "name": "email",
-            "type": "string",
-            "length": 150
+            "type": "text",
+            "constraints": {
+              "max_length": {
+                "name": "max_email_length",
+                "value": 150
+              }
+            }
           },
           {
             "name": "emergency_contact",
-            "type": "string",
-            "length": 100,
-            "default": null
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_emergency_contact_length",
+                "value": 100
+              }
+            }
           },
           {
             "name": "blood_type",
-            "type": "string",
-            "length": 5,
-            "default": null
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_blood_type_length",
+                "value": 5
+              }
+            }
           },
           {
             "name": "is_active",
@@ -110,6 +152,7 @@
       },
       {
         "name": "doctors",
+        "description": "Medical staff information and specializations",
         "columns": [
           {
             "name": "id",
@@ -122,54 +165,86 @@
           },
           {
             "name": "license_number",
-            "type": "string",
-            "length": 20,
+            "type": "text",
             "description": "Medical license number",
             "constraints": {
               "nullable": false,
               "unique": true,
-              "min_length": 5
+              "min_length": {
+                "name": "min_license_number_length",
+                "value": 5
+              },
+              "max_length": {
+                "name": "max_license_number_length",
+                "value": 20
+              }
             }
           },
           {
             "name": "first_name",
-            "type": "string",
-            "length": 80,
+            "type": "text",
             "constraints": {
               "nullable": false,
-              "min_length": 1
+              "min_length": {
+                "name": "min_doctor_first_name_length",
+                "value": 1
+              },
+              "max_length": {
+                "name": "max_doctor_first_name_length",
+                "value": 80
+              }
             }
           },
           {
             "name": "last_name",
-            "type": "string",
-            "length": 80,
+            "type": "text",
             "constraints": {
-              "nullable": false
+              "nullable": false,
+              "max_length": {
+                "name": "max_doctor_last_name_length",
+                "value": 80
+              }
             }
           },
           {
             "name": "specialization",
-            "type": "string",
-            "length": 100,
+            "type": "text",
             "constraints": {
               "nullable": false,
-              "min_length": 2
+              "min_length": {
+                "name": "min_specialization_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_specialization_length",
+                "value": 100
+              }
             }
           },
           {
             "name": "phone",
-            "type": "string",
-            "length": 15,
+            "type": "text",
             "constraints": {
-              "min_length": 10
+              "min_length": {
+                "name": "min_doctor_phone_length",
+                "value": 10
+              },
+              "max_length": {
+                "name": "max_doctor_phone_length",
+                "value": 15
+              }
             }
           },
           {
             "name": "office_room",
-            "type": "string",
-            "length": 10,
-            "default": null
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_office_room_length",
+                "value": 10
+              }
+            }
           },
           {
             "name": "years_experience",
@@ -177,8 +252,14 @@
             "default": 0,
             "constraints": {
               "nullable": false,
-              "min_value": 0,
-              "max_value": 60
+              "min_value": {
+                "name": "min_years_experience",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_years_experience",
+                "value": 60
+              }
             }
           },
           {
@@ -186,8 +267,14 @@
             "type": "integer",
             "constraints": {
               "nullable": false,
-              "min_value": 0,
-              "max_value": 100000
+              "min_value": {
+                "name": "min_consultation_fee",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_consultation_fee",
+                "value": 100000
+              }
             }
           },
           {
@@ -221,23 +308,35 @@
           },
           {
             "name": "name",
-            "type": "string",
-            "length": 100,
+            "type": "text",
             "description": "Department name",
             "constraints": {
               "nullable": false,
               "unique": true,
-              "min_length": 2
+              "min_length": {
+                "name": "min_department_name_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_department_name_length",
+                "value": 100
+              }
             }
           },
           {
             "name": "code",
-            "type": "string",
-            "length": 10,
+            "type": "text",
             "constraints": {
               "nullable": false,
               "unique": true,
-              "min_length": 2
+              "min_length": {
+                "name": "min_department_code_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_department_code_length",
+                "value": 10
+              }
             }
           },
           {
@@ -250,15 +349,26 @@
             "type": "integer",
             "constraints": {
               "nullable": false,
-              "min_value": 1,
-              "max_value": 20
+              "min_value": {
+                "name": "min_floor_number",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_floor_number",
+                "value": 20
+              }
             }
           },
           {
             "name": "extension",
-            "type": "string",
-            "length": 6,
-            "default": null
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_extension_length",
+                "value": 6
+              }
+            }
           },
           {
             "name": "budget_cents",
@@ -266,7 +376,10 @@
             "default": 0,
             "constraints": {
               "nullable": false,
-              "min_value": 0
+              "min_value": {
+                "name": "min_budget",
+                "value": 0
+              }
             }
           }
         ],
@@ -323,12 +436,18 @@
           },
           {
             "name": "appointment_time",
-            "type": "string",
-            "length": 8,
+            "type": "text",
             "description": "Time of appointment in HH:MM format",
             "constraints": {
               "nullable": false,
-              "min_length": 5
+              "min_length": {
+                "name": "min_appointment_time_length",
+                "value": 5
+              },
+              "max_length": {
+                "name": "max_appointment_time_length",
+                "value": 8
+              }
             }
           },
           {
@@ -337,17 +456,26 @@
             "default": 30,
             "constraints": {
               "nullable": false,
-              "min_value": 15,
-              "max_value": 180
+              "min_value": {
+                "name": "min_duration_minutes",
+                "value": 15
+              },
+              "max_value": {
+                "name": "max_duration_minutes",
+                "value": 180
+              }
             }
           },
           {
             "name": "status",
-            "type": "string",
-            "length": 20,
+            "type": "text",
             "default": "scheduled",
             "constraints": {
-              "nullable": false
+              "nullable": false,
+              "max_length": {
+                "name": "max_status_length",
+                "value": 20
+              }
             }
           },
           {
@@ -360,7 +488,10 @@
             "type": "integer",
             "default": null,
             "constraints": {
-              "min_value": 0
+              "min_value": {
+                "name": "min_fee_charged",
+                "value": 0
+              }
             }
           },
           {
@@ -410,6 +541,7 @@
       },
       {
         "name": "medical_records",
+        "description": "Patient medical history and treatment records",
         "columns": [
           {
             "name": "id",
@@ -447,7 +579,10 @@
             "type": "text",
             "constraints": {
               "nullable": false,
-              "min_length": 5
+              "min_length": {
+                "name": "min_diagnosis_length",
+                "value": 5
+              }
             }
           },
           {
@@ -479,8 +614,14 @@
             "default": 1,
             "constraints": {
               "nullable": false,
-              "min_value": 1,
-              "max_value": 5
+              "min_value": {
+                "name": "min_severity_level",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_severity_level",
+                "value": 5
+              }
             }
           }
         ],

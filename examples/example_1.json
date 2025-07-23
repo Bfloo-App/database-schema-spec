@@ -9,6 +9,7 @@
     "snapshot": {
       "label": "v1.0.0",
       "description": null,
+      "parent_id": null,
       "created_at": "2024-01-15T10:30:00"
     },
     "tables": [
@@ -27,47 +28,67 @@
           },
           {
             "name": "username",
-            "type": "string",
-            "length": 50,
+            "type": "text",
             "description": "Unique username for login",
             "constraints": {
               "nullable": false,
               "unique": true,
-              "min_length": 3
+              "min_length": {
+                "name": "min_username_length",
+                "value": 3
+              },
+              "max_length": {
+                "name": "max_username_length",
+                "value": 50
+              }
             }
           },
           {
             "name": "email",
-            "type": "string",
-            "length": 255,
+            "type": "text",
             "constraints": {
               "nullable": false,
-              "unique": true
+              "unique": true,
+              "max_length": {
+                "name": "max_email_length",
+                "value": 255
+              }
             }
           },
           {
             "name": "first_name",
-            "type": "string",
-            "length": 100,
+            "type": "text",
             "description": "User's first name",
             "constraints": {
-              "nullable": false
+              "nullable": false,
+              "max_length": {
+                "name": "max_first_name_length",
+                "value": 100
+              }
             }
           },
           {
             "name": "last_name",
-            "type": "string",
-            "length": 100,
+            "type": "text",
             "constraints": {
-              "nullable": false
+              "nullable": false,
+              "max_length": {
+                "name": "max_last_name_length",
+                "value": 100
+              }
             }
           },
           {
             "name": "phone",
-            "type": "string",
-            "length": 20,
+            "type": "text",
             "default": null,
-            "description": "User's phone number"
+            "description": "User's phone number",
+            "constraints": {
+              "max_length": {
+                "name": "max_phone_length",
+                "value": 20
+              }
+            }
           },
           {
             "name": "date_of_birth",
@@ -117,12 +138,15 @@
           },
           {
             "name": "name",
-            "type": "string",
-            "length": 100,
+            "type": "text",
             "description": "Category name",
             "constraints": {
               "nullable": false,
-              "unique": true
+              "unique": true,
+              "max_length": {
+                "name": "max_category_name_length",
+                "value": 100
+              }
             }
           },
           {
@@ -176,11 +200,14 @@
           },
           {
             "name": "name",
-            "type": "string",
-            "length": 200,
+            "type": "text",
             "description": "Product name",
             "constraints": {
-              "nullable": false
+              "nullable": false,
+              "max_length": {
+                "name": "max_product_name_length",
+                "value": 200
+              }
             }
           },
           {
@@ -194,7 +221,10 @@
             "description": "Product price in cents",
             "constraints": {
               "nullable": false,
-              "min_value": 0
+              "min_value": {
+                "name": "min_product_price",
+                "value": 0
+              }
             }
           },
           {
@@ -210,7 +240,10 @@
             "default": 0,
             "constraints": {
               "nullable": false,
-              "min_value": 0
+              "min_value": {
+                "name": "min_stock_quantity",
+                "value": 0
+              }
             }
           },
           {
@@ -218,7 +251,10 @@
             "type": "integer",
             "default": null,
             "constraints": {
-              "min_value": 1
+              "min_value": {
+                "name": "min_weight",
+                "value": 1
+              }
             }
           },
           {
@@ -278,12 +314,15 @@
           },
           {
             "name": "order_number",
-            "type": "string",
-            "length": 50,
+            "type": "text",
             "description": "Unique order number for tracking",
             "constraints": {
               "nullable": false,
-              "unique": true
+              "unique": true,
+              "max_length": {
+                "name": "max_order_number_length",
+                "value": 50
+              }
             }
           },
           {
@@ -292,17 +331,23 @@
             "description": "Total order amount in cents",
             "constraints": {
               "nullable": false,
-              "min_value": 0
+              "min_value": {
+                "name": "min_total_amount",
+                "value": 0
+              }
             }
           },
           {
             "name": "status",
-            "type": "string",
-            "length": 20,
+            "type": "text",
             "description": "Order status",
             "default": "pending",
             "constraints": {
-              "nullable": false
+              "nullable": false,
+              "max_length": {
+                "name": "max_status_length",
+                "value": 20
+              }
             }
           },
           {
@@ -375,7 +420,10 @@
             "description": "Quantity of the product ordered",
             "constraints": {
               "nullable": false,
-              "min_value": 1
+              "min_value": {
+                "name": "min_quantity",
+                "value": 1
+              }
             }
           },
           {
@@ -384,7 +432,10 @@
             "description": "Price per unit at time of order in cents",
             "constraints": {
               "nullable": false,
-              "min_value": 0
+              "min_value": {
+                "name": "min_unit_price",
+                "value": 0
+              }
             }
           },
           {
@@ -393,7 +444,10 @@
             "description": "Total price for this line item in cents",
             "constraints": {
               "nullable": false,
-              "min_value": 0
+              "min_value": {
+                "name": "min_total_price",
+                "value": 0
+              }
             }
           }
         ],
