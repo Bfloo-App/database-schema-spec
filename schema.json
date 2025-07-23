@@ -5,20 +5,24 @@
   "properties": {
     "database": {
       "type": "object",
-      "properties": {
-        "engine": {
-          "type": "string",
-          "description": "The type of database engine used",
-          "enum": ["PostgreSQL"]
-        },
-        "version": {
-          "type": "string",
-          "description": "The version of the database engine",
-          "enum": ["15"]
-        }
-      },
       "required": ["engine", "version"],
-      "additionalProperties": false
+      "additionalProperties": false,
+      "oneOf": [
+        {
+          "properties": {
+            "engine": {
+              "type": "string",
+              "description": "The type of database engine used",
+              "const": "PostgreSQL"
+            },
+            "version": {
+              "type": "string",
+              "description": "The version of the PostgreSQL database engine",
+              "enum": ["15"]
+            }
+          }
+        }
+      ]
     },
     "schema": {
       "type": "object",
