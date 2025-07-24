@@ -4,6 +4,11 @@
   "title": "PostgreSQL Constraint Definition",
   "type": "object",
   "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique local identifier for the constraint",
+      "examples": [1, 2, 3, 4, 5]
+    },
     "name": {
       "type": "string",
       "description": "Name of the constraint",
@@ -115,18 +120,6 @@
           }
         },
         "required": ["references"],
-        "additionalProperties": false
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "type": {
-            "const": "unique"
-          }
-        }
-      },
-      "then": {
         "additionalProperties": false
       }
     }

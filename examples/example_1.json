@@ -15,10 +15,12 @@
     },
     "tables": [
       {
+        "id": 1,
         "name": "users",
         "description": "Table containing user information and authentication data",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the user",
@@ -28,6 +30,7 @@
             }
           },
           {
+            "id": 2,
             "name": "username",
             "type": "text",
             "description": "Unique username for login",
@@ -45,6 +48,7 @@
             }
           },
           {
+            "id": 3,
             "name": "email",
             "type": "text",
             "constraints": {
@@ -57,6 +61,7 @@
             }
           },
           {
+            "id": 4,
             "name": "first_name",
             "type": "text",
             "description": "User's first name",
@@ -69,6 +74,7 @@
             }
           },
           {
+            "id": 5,
             "name": "last_name",
             "type": "text",
             "constraints": {
@@ -80,6 +86,7 @@
             }
           },
           {
+            "id": 6,
             "name": "phone",
             "type": "text",
             "default": null,
@@ -92,11 +99,13 @@
             }
           },
           {
+            "id": 7,
             "name": "date_of_birth",
             "type": "date",
             "default": null
           },
           {
+            "id": 8,
             "name": "is_active",
             "type": "boolean",
             "description": "Whether the user account is active",
@@ -106,6 +115,7 @@
             }
           },
           {
+            "id": 9,
             "name": "created_at",
             "type": "timestamp",
             "description": "When the user account was created",
@@ -117,6 +127,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "unique_full_name",
             "type": "unique",
             "description": "Ensure combination of first and last name is unique",
@@ -125,10 +136,12 @@
         ]
       },
       {
+        "id": 2,
         "name": "categories",
         "description": "Product categories for organization",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the category",
@@ -138,6 +151,7 @@
             }
           },
           {
+            "id": 2,
             "name": "name",
             "type": "text",
             "description": "Category name",
@@ -151,11 +165,13 @@
             }
           },
           {
+            "id": 3,
             "name": "description",
             "type": "text",
             "default": null
           },
           {
+            "id": 4,
             "name": "parent_id",
             "type": "integer",
             "constraints": {
@@ -163,6 +179,7 @@
             }
           },
           {
+            "id": 5,
             "name": "created_at",
             "type": "timestamp",
             "default": "current_timestamp",
@@ -173,6 +190,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_categories_parent",
             "type": "foreign_key",
             "description": "Self-referencing foreign key to create category hierarchy",
@@ -187,10 +205,12 @@
         ]
       },
       {
+        "id": 3,
         "name": "products",
         "description": "Product information and inventory",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the product",
@@ -200,6 +220,7 @@
             }
           },
           {
+            "id": 2,
             "name": "name",
             "type": "text",
             "description": "Product name",
@@ -212,11 +233,13 @@
             }
           },
           {
+            "id": 3,
             "name": "description",
             "type": "text",
             "default": null
           },
           {
+            "id": 4,
             "name": "price",
             "type": "integer",
             "description": "Product price in cents",
@@ -229,6 +252,7 @@
             }
           },
           {
+            "id": 5,
             "name": "category_id",
             "type": "integer",
             "constraints": {
@@ -236,6 +260,7 @@
             }
           },
           {
+            "id": 6,
             "name": "stock_quantity",
             "type": "integer",
             "default": 0,
@@ -248,6 +273,7 @@
             }
           },
           {
+            "id": 7,
             "name": "weight_grams",
             "type": "integer",
             "default": null,
@@ -259,6 +285,7 @@
             }
           },
           {
+            "id": 8,
             "name": "is_available",
             "type": "boolean",
             "description": "Whether the product is available for purchase",
@@ -268,6 +295,7 @@
             }
           },
           {
+            "id": 9,
             "name": "created_at",
             "type": "timestamp",
             "description": "When the product was created",
@@ -279,6 +307,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_products_category",
             "type": "foreign_key",
             "description": "Foreign key to categories table",
@@ -293,10 +322,12 @@
         ]
       },
       {
+        "id": 4,
         "name": "orders",
         "description": "Customer orders and order information",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the order",
@@ -306,6 +337,7 @@
             }
           },
           {
+            "id": 2,
             "name": "user_id",
             "type": "integer",
             "description": "User who placed the order",
@@ -314,6 +346,7 @@
             }
           },
           {
+            "id": 3,
             "name": "order_number",
             "type": "text",
             "description": "Unique order number for tracking",
@@ -327,6 +360,7 @@
             }
           },
           {
+            "id": 4,
             "name": "total_amount",
             "type": "integer",
             "description": "Total order amount in cents",
@@ -339,6 +373,7 @@
             }
           },
           {
+            "id": 5,
             "name": "status",
             "type": "text",
             "description": "Order status",
@@ -352,6 +387,7 @@
             }
           },
           {
+            "id": 6,
             "name": "order_date",
             "type": "timestamp",
             "description": "When the order was placed",
@@ -361,11 +397,13 @@
             }
           },
           {
+            "id": 7,
             "name": "shipped_date",
             "type": "timestamp",
             "default": null
           },
           {
+            "id": 8,
             "name": "delivery_address",
             "type": "text",
             "default": null
@@ -373,6 +411,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_orders_user",
             "type": "foreign_key",
             "description": "Foreign key to users table",
@@ -387,10 +426,12 @@
         ]
       },
       {
+        "id": 5,
         "name": "order_items",
         "description": "Individual items within an order",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the order item",
@@ -400,6 +441,7 @@
             }
           },
           {
+            "id": 2,
             "name": "order_id",
             "type": "integer",
             "description": "Order this item belongs to",
@@ -408,6 +450,7 @@
             }
           },
           {
+            "id": 3,
             "name": "product_id",
             "type": "integer",
             "description": "Product being ordered",
@@ -416,6 +459,7 @@
             }
           },
           {
+            "id": 4,
             "name": "quantity",
             "type": "integer",
             "description": "Quantity of the product ordered",
@@ -428,6 +472,7 @@
             }
           },
           {
+            "id": 5,
             "name": "unit_price",
             "type": "integer",
             "description": "Price per unit at time of order in cents",
@@ -440,6 +485,7 @@
             }
           },
           {
+            "id": 6,
             "name": "total_price",
             "type": "integer",
             "description": "Total price for this line item in cents",
@@ -454,6 +500,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_order_items_order",
             "type": "foreign_key",
             "description": "Foreign key to orders table",
@@ -466,6 +513,7 @@
             "on_update": "cascade"
           },
           {
+            "id": 2,
             "name": "fk_order_items_product",
             "type": "foreign_key",
             "description": "Foreign key to products table",
@@ -478,6 +526,7 @@
             "on_update": "cascade"
           },
           {
+            "id": 3,
             "name": "unique_order_product",
             "type": "unique",
             "description": "Ensure each product appears only once per order",

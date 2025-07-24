@@ -4,6 +4,11 @@
   "title": "PostgreSQL Column Definition",
   "type": "object",
   "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique local identifier for the column",
+      "examples": [1, 2, 3, 4, 5]
+    },
     "name": {
       "type": "string",
       "description": "Name of the column",

@@ -15,10 +15,12 @@
     },
     "tables": [
       {
+        "id": 1,
         "name": "patients",
         "description": "Patient information and medical records",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "constraints": {
@@ -27,6 +29,7 @@
             }
           },
           {
+            "id": 2,
             "name": "patient_number",
             "type": "text",
             "constraints": {
@@ -39,6 +42,7 @@
             }
           },
           {
+            "id": 3,
             "name": "first_name",
             "type": "text",
             "constraints": {
@@ -54,6 +58,7 @@
             }
           },
           {
+            "id": 4,
             "name": "last_name",
             "type": "text",
             "constraints": {
@@ -69,6 +74,7 @@
             }
           },
           {
+            "id": 5,
             "name": "date_of_birth",
             "type": "date",
             "constraints": {
@@ -76,6 +82,7 @@
             }
           },
           {
+            "id": 6,
             "name": "gender",
             "type": "text",
             "default": null,
@@ -87,6 +94,7 @@
             }
           },
           {
+            "id": 7,
             "name": "phone",
             "type": "text",
             "default": null,
@@ -102,6 +110,7 @@
             }
           },
           {
+            "id": 8,
             "name": "email",
             "type": "text",
             "constraints": {
@@ -112,6 +121,7 @@
             }
           },
           {
+            "id": 9,
             "name": "emergency_contact",
             "type": "text",
             "default": null,
@@ -123,6 +133,7 @@
             }
           },
           {
+            "id": 10,
             "name": "blood_type",
             "type": "text",
             "default": null,
@@ -134,6 +145,7 @@
             }
           },
           {
+            "id": 11,
             "name": "is_active",
             "type": "boolean",
             "default": true,
@@ -142,6 +154,7 @@
             }
           },
           {
+            "id": 12,
             "name": "registered_at",
             "type": "timestamp",
             "default": "current_timestamp",
@@ -152,10 +165,12 @@
         ]
       },
       {
+        "id": 2,
         "name": "doctors",
         "description": "Medical staff information and specializations",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the doctor",
@@ -165,6 +180,7 @@
             }
           },
           {
+            "id": 2,
             "name": "license_number",
             "type": "text",
             "description": "Medical license number",
@@ -182,6 +198,7 @@
             }
           },
           {
+            "id": 3,
             "name": "first_name",
             "type": "text",
             "constraints": {
@@ -197,6 +214,7 @@
             }
           },
           {
+            "id": 4,
             "name": "last_name",
             "type": "text",
             "constraints": {
@@ -208,6 +226,7 @@
             }
           },
           {
+            "id": 5,
             "name": "specialization",
             "type": "text",
             "constraints": {
@@ -223,6 +242,7 @@
             }
           },
           {
+            "id": 6,
             "name": "phone",
             "type": "text",
             "constraints": {
@@ -237,6 +257,7 @@
             }
           },
           {
+            "id": 7,
             "name": "office_room",
             "type": "text",
             "default": null,
@@ -248,6 +269,7 @@
             }
           },
           {
+            "id": 8,
             "name": "years_experience",
             "type": "integer",
             "default": 0,
@@ -264,6 +286,7 @@
             }
           },
           {
+            "id": 9,
             "name": "consultation_fee_cents",
             "type": "integer",
             "constraints": {
@@ -279,11 +302,13 @@
             }
           },
           {
+            "id": 10,
             "name": "is_accepting_patients",
             "type": "boolean",
             "default": true
           },
           {
+            "id": 11,
             "name": "joined_at",
             "type": "date",
             "default": "current_date",
@@ -295,10 +320,12 @@
         "constraints": []
       },
       {
+        "id": 3,
         "name": "departments",
         "description": "Hospital departments and their information",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the department",
@@ -308,6 +335,7 @@
             }
           },
           {
+            "id": 2,
             "name": "name",
             "type": "text",
             "description": "Department name",
@@ -325,6 +353,7 @@
             }
           },
           {
+            "id": 3,
             "name": "code",
             "type": "text",
             "constraints": {
@@ -341,11 +370,13 @@
             }
           },
           {
+            "id": 4,
             "name": "head_doctor_id",
             "type": "integer",
             "default": null
           },
           {
+            "id": 5,
             "name": "floor_number",
             "type": "integer",
             "constraints": {
@@ -361,6 +392,7 @@
             }
           },
           {
+            "id": 6,
             "name": "extension",
             "type": "text",
             "default": null,
@@ -372,6 +404,7 @@
             }
           },
           {
+            "id": 7,
             "name": "budget_cents",
             "type": "integer",
             "default": 0,
@@ -386,6 +419,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_department_head_doctor",
             "type": "foreign_key",
             "description": "Foreign key to doctors table for department head",
@@ -400,10 +434,12 @@
         ]
       },
       {
+        "id": 4,
         "name": "appointments",
         "description": "Patient appointments with doctors",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "constraints": {
@@ -412,6 +448,7 @@
             }
           },
           {
+            "id": 2,
             "name": "patient_id",
             "type": "integer",
             "description": "Reference to patient",
@@ -420,6 +457,7 @@
             }
           },
           {
+            "id": 3,
             "name": "doctor_id",
             "type": "integer",
             "description": "Reference to doctor",
@@ -428,6 +466,7 @@
             }
           },
           {
+            "id": 4,
             "name": "appointment_date",
             "type": "date",
             "description": "Date of the appointment",
@@ -436,6 +475,7 @@
             }
           },
           {
+            "id": 5,
             "name": "appointment_time",
             "type": "text",
             "description": "Time of appointment in HH:MM format",
@@ -452,6 +492,7 @@
             }
           },
           {
+            "id": 6,
             "name": "duration_minutes",
             "type": "integer",
             "default": 30,
@@ -468,6 +509,7 @@
             }
           },
           {
+            "id": 7,
             "name": "status",
             "type": "text",
             "default": "scheduled",
@@ -480,11 +522,13 @@
             }
           },
           {
+            "id": 8,
             "name": "notes",
             "type": "text",
             "default": null
           },
           {
+            "id": 9,
             "name": "fee_charged_cents",
             "type": "integer",
             "default": null,
@@ -496,11 +540,13 @@
             }
           },
           {
+            "id": 10,
             "name": "created_at",
             "type": "timestamp",
             "default": "current_timestamp"
           },
           {
+            "id": 11,
             "name": "updated_at",
             "type": "timestamp",
             "default": "current_timestamp",
@@ -511,6 +557,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_appointment_patient",
             "type": "foreign_key",
             "columns": ["patient_id"],
@@ -521,6 +568,7 @@
             "on_delete": "cascade"
           },
           {
+            "id": 2,
             "name": "fk_appointment_doctor",
             "type": "foreign_key",
             "description": "Foreign key to doctors table",
@@ -533,6 +581,7 @@
             "on_update": "cascade"
           },
           {
+            "id": 3,
             "name": "unique_doctor_datetime",
             "type": "unique",
             "description": "Prevent double-booking of doctors",
@@ -541,10 +590,12 @@
         ]
       },
       {
+        "id": 5,
         "name": "medical_records",
         "description": "Patient medical history and treatment records",
         "columns": [
           {
+            "id": 1,
             "name": "id",
             "type": "serial",
             "description": "Primary key for the medical record",
@@ -554,6 +605,7 @@
             }
           },
           {
+            "id": 2,
             "name": "patient_id",
             "type": "integer",
             "constraints": {
@@ -561,6 +613,7 @@
             }
           },
           {
+            "id": 3,
             "name": "doctor_id",
             "type": "integer",
             "constraints": {
@@ -568,6 +621,7 @@
             }
           },
           {
+            "id": 4,
             "name": "visit_date",
             "type": "date",
             "default": "current_date",
@@ -576,6 +630,7 @@
             }
           },
           {
+            "id": 5,
             "name": "diagnosis",
             "type": "text",
             "constraints": {
@@ -587,16 +642,19 @@
             }
           },
           {
+            "id": 6,
             "name": "treatment",
             "type": "text",
             "default": null
           },
           {
+            "id": 7,
             "name": "prescription",
             "type": "text",
             "default": null
           },
           {
+            "id": 8,
             "name": "follow_up_required",
             "type": "boolean",
             "default": false,
@@ -605,11 +663,13 @@
             }
           },
           {
+            "id": 9,
             "name": "follow_up_date",
             "type": "date",
             "default": null
           },
           {
+            "id": 10,
             "name": "severity_level",
             "type": "integer",
             "default": 1,
@@ -628,6 +688,7 @@
         ],
         "constraints": [
           {
+            "id": 1,
             "name": "fk_record_patient",
             "type": "foreign_key",
             "description": "Foreign key to patients table",
@@ -640,6 +701,7 @@
             "on_update": "cascade"
           },
           {
+            "id": 2,
             "name": "fk_record_doctor",
             "type": "foreign_key",
             "columns": ["doctor_id"],
