@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.0
+    hooks:
+      # Update the uv lockfile
+      - id: uv-lock
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.12.5
+    hooks:
+      # Run the linter with fixes (excluding import sorting)
+      - id: ruff
+        name: "ruff-lint"
+        args: [--fix, --exit-non-zero-on-fix]
+        # Ignores I rules to separate linting from import sorting
+
+      # Sort imports (matches `ruff check --select I --fix`)
+      # Selects only I (import sorting) rules and fixes them
+      - id: ruff
+        name: "ruff-sort-imports"
+        args: [--select, "I", --fix, --exit-non-zero-on-fix]
+
+      # Format (matches `ruff format`)
+      - id: ruff-format
+        name: "ruff-format"
+
+  - repo: https://github.com/RobertCraigie/pyright-python
+    rev: v1.1.403
+    hooks:
+      - id: pyright
+        name: "pyright"
