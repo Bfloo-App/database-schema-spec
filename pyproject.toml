@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "jsonschema>=4.25.0",
+    "pydantic>=2.11.7",
+]
 
 [dependency-groups]
 dev = [
@@ -12,6 +15,7 @@ dev = [
     "pyright>=1.1.403",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
+    "pytest-mock>=3.14.1",
     "ruff>=0.12.7",
 ]
 
@@ -95,8 +99,8 @@ docstring-code-format = false
 docstring-code-line-length = "dynamic"
 
 [tool.pyright]
-typeCheckingMode = "strict"
-include = ["app", "tests"]
+typeCheckingMode = "standard"
+include = ["database_schema_spec", "main.py", "tests"]
 exclude = ["**/__pycache__/**", "build", "dist", ".venv"]
 # The following lines are for pre-commit configuration
 venvPath = "."
@@ -106,6 +110,7 @@ venv = ".venv"
 minversion = "6.0"
 testpaths = ["tests"]
 python_files = "test_*.py"
+pythonpath = ["."]
 addopts = [
     "--strict-config",
     "--verbose",

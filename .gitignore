@@ -203,4 +203,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-dev_docs/
+# Project or developer specific files
+AGENTS.md
+.kilocode/
+output/
