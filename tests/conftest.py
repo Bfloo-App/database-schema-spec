@@ -1,5 +1,10 @@
 """Production-quality test fixtures and configuration."""
 
+# Set test environment variables BEFORE any imports that might trigger config loading
+import os  # noqa: E402
+
+os.environ.setdefault("BASE_URL", "https://test.example.com/schemas")
+
 import json
 import shutil
 import tempfile
@@ -11,6 +16,20 @@ import pytest
 
 from database_schema_spec.core.schemas import DatabaseVariantSpec
 from database_schema_spec.resolution.interfaces import IJSONRefResolver
+
+
+def pytest_configure(config):
+    """Configure pytest environment before any imports happen."""
+    # Environment variable is already set at module level above
+    pass
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_config():
+    """Ensure config uses test environment variables."""
+    # At this point, the config should already be loaded with our test env vars
+    # This fixture just serves as a placeholder for future config customization
+    yield
 
 
 @pytest.fixture

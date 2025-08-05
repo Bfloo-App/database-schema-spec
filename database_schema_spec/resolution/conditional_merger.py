@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from database_schema_spec.core.constants import ONEOF_FIELD, REF_FIELD
+from database_schema_spec.core.config import config
 from database_schema_spec.core.exceptions import ValidationError
 from database_schema_spec.core.schemas import DatabaseVariantSpec
 
@@ -48,7 +48,7 @@ class ConditionalMerger:
         result_schema = dict(base_schema)
 
         # Check if this schema has oneOf conditions to process
-        oneof_data = result_schema.get(ONEOF_FIELD)
+        oneof_data = result_schema.get(config.json_schema_fields.oneof_field)
         if not oneof_data or not isinstance(oneof_data, list):
             return result_schema
 
@@ -87,8 +87,8 @@ class ConditionalMerger:
         result_schema = merged_schema
 
         # Remove the oneOf block since we've resolved it
-        if ONEOF_FIELD in result_schema:
-            del result_schema[ONEOF_FIELD]
+        if config.json_schema_fields.oneof_field in result_schema:
+            del result_schema[config.json_schema_fields.oneof_field]
 
         return result_schema
 
@@ -217,7 +217,7 @@ class ConditionalMerger:
                 return result_schema
 
             # If then clause has a $ref, resolve it first
-            if REF_FIELD in then_clause:
+            if config.json_schema_fields.ref_field in then_clause:
                 try:
                     resolved_then = self.resolver.resolve_references(then_clause)
                     result_schema = self._deep_merge_schemas(
@@ -280,7 +280,7 @@ class ConditionalMerger:
             List of supported variant strings in "Engine Version" format
         """
         variants: list[str] = []
-        oneof_data = schema.get(ONEOF_FIELD, [])
+        oneof_data = schema.get(config.json_schema_fields.oneof_field, [])
 
         if not isinstance(oneof_data, list):
             return variants

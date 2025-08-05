@@ -5,14 +5,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from database_schema_spec.core.constants import (
-    DOCS_DIR,
-    ERROR_FILE_NOT_FOUND,
-    ERROR_FILE_SYSTEM,
-    ERROR_INVALID_SCHEMA,
-    OUTPUT_DIR,
-    ROOT_SCHEMA_FILE,
-)
+from database_schema_spec.core.config import config
 from database_schema_spec.core.exceptions import SchemaGenerationError, ValidationError
 from database_schema_spec.core.schemas import DatabaseVariantSpec
 from database_schema_spec.io.output_manager import OutputManager
@@ -31,7 +24,7 @@ class SchemaGenerator:
     """
 
     def __init__(
-        self, docs_path: Path = DOCS_DIR, output_path: Path = OUTPUT_DIR
+        self, docs_path: Path = config.docs_dir, output_path: Path = config.output_dir
     ) -> None:
         """Initialize the schema generator.
 
@@ -62,13 +55,13 @@ class SchemaGenerator:
             )
         except SchemaGenerationError as e:
             logger.error("Schema generation error: %s", e, exc_info=True)
-            sys.exit(ERROR_INVALID_SCHEMA)
+            sys.exit(config.exit_codes.error_invalid_schema)
         except FileNotFoundError as e:
             logger.error("Missing required input file: %s", e, exc_info=True)
-            sys.exit(ERROR_FILE_NOT_FOUND)
+            sys.exit(config.exit_codes.error_file_not_found)
         except Exception:
             logger.exception("Unexpected error occurred")
-            sys.exit(ERROR_FILE_SYSTEM)
+            sys.exit(config.exit_codes.error_file_system)
 
     def run_for_testing(self) -> list[Path]:
         """Run the complete schema generation process for testing.
@@ -106,6 +99,12 @@ class SchemaGenerator:
             file_path = self.generate_variant(variant)
             generated_files.append(file_path)
 
+        # Generate version map after all variants are created
+        logger.info("Generating version map...")
+        vmap_path = self.output_manager.write_version_map(config.base_url)
+        generated_files.append(vmap_path)
+        logger.info("Version map written to: %s", vmap_path)
+
         return generated_files
 
     def generate_variant(self, variant: DatabaseVariantSpec) -> Path:
@@ -124,7 +123,7 @@ class SchemaGenerator:
         variant_conditional_merger = ConditionalMerger(variant_resolver)
 
         # Load the root schema with variant-aware resolution
-        base_schema = variant_resolver.resolve_file(ROOT_SCHEMA_FILE)
+        base_schema = variant_resolver.resolve_file(config.file_names.root_schema_file)
 
         # Apply conditional logic for this variant
         unified_schema = variant_conditional_merger.apply_conditional_logic(

@@ -6,7 +6,7 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from database_schema_spec.core.constants import DATABASE_SCHEMA_FILE, ONEOF_FIELD
+from database_schema_spec.core.config import config
 from database_schema_spec.core.exceptions import VariantExtractionError
 from database_schema_spec.core.schemas import DatabaseVariantSpec
 from database_schema_spec.resolution.resolver import JSONRefResolver
@@ -38,13 +38,15 @@ class VariantExtractor:
         """
         try:
             # Load the database schema file
-            database_schema = self.resolver.resolve_file(DATABASE_SCHEMA_FILE)
+            database_schema = self.resolver.resolve_file(
+                config.file_names.database_schema_file
+            )
 
             # Extract oneOf items
-            oneof_items = database_schema.get(ONEOF_FIELD, [])
+            oneof_items = database_schema.get(config.json_schema_fields.oneof_field, [])
             if not isinstance(oneof_items, list):
                 raise VariantExtractionError(
-                    f"Invalid oneOf structure in {DATABASE_SCHEMA_FILE}"
+                    f"Invalid oneOf structure in {config.file_names.database_schema_file}"
                 )
 
             # Parse each oneOf item to extract variants
@@ -52,7 +54,7 @@ class VariantExtractor:
 
             if not variants:
                 raise VariantExtractionError(
-                    f"No variants found in {DATABASE_SCHEMA_FILE}"
+                    f"No variants found in {config.file_names.database_schema_file}"
                 )
 
             return variants
@@ -61,7 +63,7 @@ class VariantExtractor:
             if isinstance(e, VariantExtractionError):
                 raise
             raise VariantExtractionError(
-                f"Failed to extract variants from {DATABASE_SCHEMA_FILE}: {e}"
+                f"Failed to extract variants from {config.file_names.database_schema_file}: {e}"
             ) from e
 
     def parse_oneof_block(self, oneof_items: list[Any]) -> list[DatabaseVariantSpec]:

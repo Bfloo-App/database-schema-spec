@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from database_schema_spec.core.constants import DOCS_DIR, ONEOF_FIELD, REF_FIELD
+from database_schema_spec.core.config import config
 from database_schema_spec.core.exceptions import (
     CircularReferenceError,
     ReferenceResolutionError,
@@ -26,7 +26,7 @@ class JSONRefResolver:
 
     def __init__(
         self,
-        base_path: Path = DOCS_DIR,
+        base_path: Path = config.docs_dir,
         current_variant: DatabaseVariantSpec | None = None,
     ) -> None:
         """Initialize the JSON reference resolver.
@@ -46,14 +46,14 @@ class JSONRefResolver:
         if not isinstance(schema, dict):
             return schema
 
-        if REF_FIELD in schema:
+        if config.json_schema_fields.ref_field in schema:
             return self._resolve_ref(schema, current_file)
         return self._resolve_nested(schema, current_file)
 
     def _resolve_ref(
         self, schema: dict[str, Any], current_file: str | None
     ) -> dict[str, Any]:
-        ref_path = schema[REF_FIELD]
+        ref_path = schema[config.json_schema_fields.ref_field]
         if self.detect_circular_reference(ref_path):
             raise CircularReferenceError(self.resolution_stack + [ref_path])
         self.resolution_stack.append(ref_path)
@@ -81,7 +81,7 @@ class JSONRefResolver:
     ) -> dict[str, Any]:
         result = dict(resolved_content)
         for key, value in schema.items():
-            if key == REF_FIELD:
+            if key == config.json_schema_fields.ref_field:
                 continue
             if key in result:
                 if isinstance(result[key], dict) and isinstance(value, dict):
@@ -185,7 +185,7 @@ class JSONRefResolver:
             return schema
 
         # If schema doesn't have oneOf blocks, return unchanged
-        if ONEOF_FIELD not in schema:
+        if config.json_schema_fields.oneof_field not in schema:
             return schema
 
         # Create a conditional merger to resolve oneOf blocks

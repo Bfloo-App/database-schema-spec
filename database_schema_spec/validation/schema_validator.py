@@ -7,7 +7,7 @@ from typing import Any
 import jsonschema
 from jsonschema import Draft7Validator
 
-from database_schema_spec.core.constants import ID_FIELD, REF_FIELD, SCHEMA_FIELD
+from database_schema_spec.core.config import config
 from database_schema_spec.core.schemas import ValidationResult
 
 
@@ -103,12 +103,12 @@ class SchemaValidator:
             warnings: List to append warnings to
         """
         # Check for recommended fields
-        if SCHEMA_FIELD not in schema:
+        if config.json_schema_fields.schema_field not in schema:
             warnings.append(
                 "Missing '$schema' field - recommended for schema validation"
             )
 
-        if ID_FIELD not in schema:
+        if config.json_schema_fields.id_field not in schema:
             warnings.append(
                 "Missing '$id' field - recommended for schema identification"
             )
@@ -129,7 +129,9 @@ class SchemaValidator:
         if isinstance(obj, dict):
             for key, value in obj.items():
                 current_path = f"{path}.{key}" if path else str(key)
-                if key == REF_FIELD and isinstance(value, str):
+                if key == config.json_schema_fields.ref_field and isinstance(
+                    value, str
+                ):
                     warnings.append(
                         f"Unresolved reference found at {current_path}: {value}"
                     )

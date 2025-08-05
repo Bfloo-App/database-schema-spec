@@ -64,3 +64,20 @@ class ValidationError(SchemaGenerationError):
     def __init__(self, errors: list[str]) -> None:
         self.errors = errors
         super().__init__(f"Schema validation failed: {'; '.join(errors)}")
+
+
+class ConfigurationError(SchemaGenerationError):
+    """Error in application configuration.
+
+    Raised when required configuration values are missing or invalid,
+    such as missing environment variables or invalid configuration settings.
+
+    Args:
+        variable_name: The name of the configuration variable that caused the error
+        message: Optional custom error message
+    """
+
+    def __init__(self, variable_name: str) -> None:
+        self.variable_name = variable_name
+        message = f"Required configuration variable '{variable_name}' is not set"
+        super().__init__(message)
