@@ -13,7 +13,7 @@ A Python package for generating unified JSON documentation files for database sc
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Bfloo-App/database-schema-spec.git
 cd database-schema-spec
 ```
 
@@ -83,10 +83,10 @@ database-schema-spec/
 ### Running Tests
 
 ```bash
-# Run all tests
+# Run all tests: NOTE some default flags are already set on puproject.toml
 uv run pytest
 
-# Run specific test file
+# Run specific test file example
 uv run pytest tests/test_integration.py
 
 ```
@@ -110,8 +110,10 @@ uv run pyright
 # Install pre-commit hooks
 uv run pre-commit install
 
-# Run pre-commit on all files
+# Run pre-commit *manually* on all files
+# Once pre-commit is installed it should run everytime you attempt to commit changes on the changed files
 uv run pre-commit run --all-files
+
 ```
 
 ## 📝 Environment Variables
