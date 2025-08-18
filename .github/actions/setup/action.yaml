@@ -1,0 +1,16 @@
+name: Setup UV and python
+runs:
+  using: "composite"
+  steps:
+    # Setup Python
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version-file: ".python-version" # Use .python-version file to set Python version
+
+    # Setup uv
+    - name: Setup uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        version: "0.8.0" # Specify the version of uv to use
+        enable-cache: true # Enable caching for uv dependencies

@@ -1,27 +1,154 @@
-# Database Schema Specification
+# Database Schema Spec Generator
 
-🏢 **Standardized, modular JSON Schema specification** for database structure definition and validation. Designed for scalability, maintainability, and seamless integration with AI systems.
+A Python package for generating unified JSON documentation files for database schemas by resolving JSON Schema references and handling oneOf variants. This tool processes modular database schema specifications and generates consolidated documentation for different database engines and versions.
 
-## 🏗️ Architecture
+## 🚀 Quick Start
 
-Our modular architecture prevents code duplication and enables effortless database version management:
+### Prerequisites
 
-```
-specs.json                                    # 🎯 Main orchestrator with $schema/$id
-schemas/
-├── base/
-│   ├── database.json                        # Database engine definitions
-│   └── schema.json                          # Core schema structure
-└── engines/
-    └── postgresql/
-        └── v15.0/                           # Version-specific isolation
-            ├── schema.json                  # PostgreSQL 15.0 rules
-            └── components/                  # Version-specific components
-                ├── table.json               # Table definitions for v15.0
-                ├── column.json              # Column types for v15.0
-                └── constraint.json          # Constraints for v15.0
+- [uv](https://docs.astral.sh/uv/) package manager
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/Bfloo-App/database-schema-spec.git
+cd database-schema-spec
 ```
 
-## FSD
+2. Install dependencies using uv:
 
-- **FSD**: [Full Specification Document](https://www.notion.so/Database-Engines-Support-237bed96279c80ee85c1e69cf2abc42f) - Comprehensive guide to the database schema specification.
+```bash
+uv sync --frozen
+```
+
+3. Set up environment variables by creating a `.env` file:
+
+```bash
+cp .env.example .env
+# Edit .env and set BASE_URL to your desired URL
+```
+
+**Note:** The `BASE_URL` environment variable is **required**. The application will fail to start if it's not set.
+
+## 🏃‍♂️ Running the Application
+
+### Using uv (Recommended)
+
+```bash
+# Run the schema generator
+uv run main.py
+```
+
+### Using Python directly
+
+```bash
+# Activate the virtual environment first
+source .venv/bin/activate  # On Unix/macOS
+# or
+.venv\Scripts\activate     # On Windows
+
+# Then run
+python main.py
+```
+
+## 📁 Project Structure
+
+```
+database-schema-spec/
+├── main.py                           # Entry point
+├── .env                             # Environment configuration
+├── pyproject.toml                   # Project dependencies
+├── database_schema_spec/            # Main package
+│   ├── cli/                        # Command-line interface
+│   ├── core/                       # Core functionality
+│   │   ├── config.py               # Configuration management
+│   │   ├── exceptions.py           # Custom exceptions
+│   │   └── schemas.py              # Data models
+│   ├── io/                         # Input/output handling
+│   ├── logger/                     # Logging configuration
+│   ├── resolution/                 # Schema resolution logic
+│   └── validation/                 # Schema validation
+├── docs/                           # Input schema files
+│   ├── specs.json                  # Main schema file
+│   └── schemas/                    # Schema definitions
+└── output/                         # Generated output files
+    ├── vmap.json                   # Version mapping
+    └── postgresql/                 # Database-specific outputs
+```
+
+## 🧪 Development
+
+### Running Tests
+
+```bash
+# Run all tests: NOTE some default flags are already set on puproject.toml
+uv run pytest
+
+# Run specific test file example
+uv run pytest tests/test_integration.py
+
+```
+
+### Code Quality
+
+```bash
+# Lint code
+uv run ruff check
+
+# Format code
+uv run ruff format
+
+# Type checking
+uv run pyright
+```
+
+### Pre-commit Hooks
+
+```bash
+# Install pre-commit hooks
+uv run pre-commit install
+
+# Run pre-commit *manually* on all files
+# Once pre-commit is installed it should run everytime you attempt to commit changes on the changed files
+uv run pre-commit run --all-files
+
+```
+
+## 📝 Environment Variables
+
+| Variable   | Required | Description                         | Example                           |
+| ---------- | -------- | ----------------------------------- | --------------------------------- |
+| `BASE_URL` | ✅ Yes   | Base URL for generated schema files | `https://api.example.com/schemas` |
+
+## 🔧 Configuration
+
+The application can be configured through:
+
+1. **Environment Variables**: Set in `.env` file or system environment
+2. **Configuration Constants**: Defined in `database_schema_spec/core/config.py`
+
+### Default Paths
+
+- **Input Directory**: `docs/` (contains source schema files)
+- **Output Directory**: `output/` (generated files are written here)
+- **Root Schema File**: `docs/specs.json`
+
+## 📤 Output
+
+The generator creates:
+
+- **Unified Schema Files**: Consolidated schemas for each database variant
+- **Version Map** (`vmap.json`): Mapping of available database versions
+- **Database-Specific Directories**: Organized by engine and version
+
+Example output structure:
+
+```
+output/
+├── vmap.json
+└── postgresql/
+    └── 15.0/
+        └── unified_schema.json
+```

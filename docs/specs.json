@@ -27,7 +27,7 @@
         }
       },
       "then": {
-        "$ref": "schemas/engines/postgresql/v15.0/schema.json"
+        "$ref": "schemas/engines/postgresql/v15.0/spec.json"
       }
     }
   ]
