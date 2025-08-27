@@ -150,5 +150,5 @@ output/
 ├── vmap.json
 └── postgresql/
     └── 15.0/
-        └── unified_schema.json
+        └── spec.json
 ```

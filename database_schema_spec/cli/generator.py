@@ -130,6 +130,13 @@ class SchemaGenerator:
             base_schema, variant
         )
 
+        # Inject dynamic $id derived from BASE_URL for the final output
+        id_field = config.json_schema_fields.id_field
+        spec_url = self.output_manager._get_spec_url(
+            variant.engine, variant.version, config.base_url
+        )
+        unified_schema[id_field] = spec_url
+
         # Validate the resulting schema
         validation_result = self.validator.validate_schema(unified_schema)
         if not validation_result.is_valid:
