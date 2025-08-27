@@ -89,5 +89,5 @@ class Config(BaseSettings):
 
 
 # At application import time, populate os.environ from .env (if present), then enforce presence.
-load_dotenv()
+load_dotenv(override=True)
 config = Config()
