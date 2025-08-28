@@ -1,6 +1,5 @@
 {
   "title": "PostgreSQL 15.0 Schema Rules",
-  "$id": "https://schemas.bfloo.com/postgresql/15.0/spec.json",
   "properties": {
     "schema": {
       "properties": {

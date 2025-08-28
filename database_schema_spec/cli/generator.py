@@ -130,6 +130,34 @@ class SchemaGenerator:
             base_schema, variant
         )
 
+        # Inject dynamic $id derived from BASE_URL for the final output
+        id_field = config.json_schema_fields.id_field
+        schema_field = config.json_schema_fields.schema_field
+        spec_url = self.output_manager._get_spec_url(
+            variant.engine, variant.version, config.base_url
+        )
+        # Set/override $id
+        unified_schema[id_field] = spec_url
+
+        # Reorder top-level keys to ensure `$id` appears immediately after `$schema` when present
+        if isinstance(unified_schema, dict):
+            reordered: dict[str, object] = {}
+            # If $schema exists, place it first
+            if schema_field in unified_schema:
+                reordered[schema_field] = unified_schema[schema_field]
+                reordered[id_field] = unified_schema[id_field]
+                for k, v in unified_schema.items():
+                    if k not in (schema_field, id_field):
+                        reordered[k] = v
+                unified_schema = reordered  # type: ignore[assignment]
+            else:
+                # If no $schema, put $id first then the rest in original order
+                reordered[id_field] = unified_schema[id_field]
+                for k, v in unified_schema.items():
+                    if k != id_field:
+                        reordered[k] = v
+                unified_schema = reordered  # type: ignore[assignment]
+
         # Validate the resulting schema
         validation_result = self.validator.validate_schema(unified_schema)
         if not validation_result.is_valid:
