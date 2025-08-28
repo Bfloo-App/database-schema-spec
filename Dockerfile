@@ -1,12 +1,6 @@
 # Multi-stage build for database schema spec generator
 # Stage 1: Build the schemas
-FROM alpine:3.22.1 AS builder
-
-# Install Python, uv, and git (needed for some dependencies)
-RUN apk add --no-cache python3 py3-pip git
-
-# Install uv package manager
-RUN pip3 install --break-system-packages uv
+FROM ghcr.io/astral-sh/uv:0.8.13-alpine3.22 AS builder
 
 # Set working directory
 WORKDIR /app
@@ -27,7 +21,7 @@ COPY .env ./
 RUN uv run python main.py
 
 # Stage 2: Final lightweight image with only the output
-FROM alpine:3.22.1
+FROM alpine:3.22 AS final
 
 # Create output directory
 RUN mkdir -p /output
