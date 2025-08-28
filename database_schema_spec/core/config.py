@@ -1,9 +1,7 @@
 """Configuration constants for the database schema spec generator."""
 
-import os
 from pathlib import Path
 
-from dotenv import load_dotenv
 from pydantic import BaseModel, Field, ValidationError
 from pydantic_settings import BaseSettings
 
@@ -70,8 +68,6 @@ class Config(BaseSettings):
             # Enforce presence of required env variables in the process environment
             # before delegating to BaseSettings. This ensures tests that clear os.environ
             # see the expected ConfigurationError.
-            if "base_url" not in data and "BASE_URL" not in os.environ:
-                raise ConfigurationError(variable_name="BASE_URL")
 
             super().__init__(**data)
         except ValidationError as e:
@@ -88,6 +84,4 @@ class Config(BaseSettings):
             raise
 
 
-# At application import time, populate os.environ from .env (if present), then enforce presence.
-load_dotenv(override=True)
 config = Config()
