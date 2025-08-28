@@ -65,10 +65,6 @@ class Config(BaseSettings):
     def __init__(self, **data):
         """Initialize config with custom error handling for missing required fields."""
         try:
-            # Enforce presence of required env variables in the process environment
-            # before delegating to BaseSettings. This ensures tests that clear os.environ
-            # see the expected ConfigurationError.
-
             super().__init__(**data)
         except ValidationError as e:
             # Only handle missing field errors, let other validation errors bubble up
