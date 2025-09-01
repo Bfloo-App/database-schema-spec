@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - main # Run on every PR to main
-      - staging # Run on every PR to staging
       - dev # Run on every PR to dev
       - feature/* # Run on every PR to feature branches
   workflow_call: # This makes it reusable in other workflows
