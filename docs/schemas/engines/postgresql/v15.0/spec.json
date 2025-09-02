@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PostgreSQL 15.0 Schema Specification",
+  "description": "JSON Schema for validating schema.yaml files targeting PostgreSQL 15.0",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable name of the schema",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "type": ["string", "null"],
+      "description": "Description of the schema",
+      "maxLength": 256
+    },
+    "tables": {
+      "type": "array",
+      "description": "List of tables in the schema",
+      "items": {
+        "$ref": "components/table.json"
+      }
+    }
+  },
+  "required": ["name", "tables"],
+  "additionalProperties": false
+}

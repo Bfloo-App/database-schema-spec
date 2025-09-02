@@ -1,0 +1,66 @@
+# Example config.yaml for PostgreSQL
+# This file contains project configuration and database connection settings.
+# Place this file at the root of your database/ directory.
+
+# Unique identifier linking this project to the web application
+# Generated automatically on first `db sync push` if not present
+schema_id: "550e8400-e29b-41d4-a716-446655440000"
+
+# Database engine configuration
+# Version is tracked per-snapshot in manifest.yaml, not here
+database:
+  engine: "PostgreSQL"
+
+# API configuration for web app synchronization
+api:
+  base_url: "https://api.bfloo.app"
+  key: "${BFLOO_API_KEY}"  # Resolved from environment or .env file
+
+# PostgreSQL connection settings per environment
+# Uses official libpq parameter names
+# See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+environments:
+  # Production environment - use strict SSL and read-write primary
+  production:
+    host: "${PROD_DB_HOST}"
+    port: 5432
+    dbname: "${PROD_DB_NAME}"
+    user: "${PROD_DB_USER}"
+    password: "${PROD_DB_PASSWORD}"
+    sslmode: "verify-full"
+    sslrootcert: "/etc/ssl/certs/ca-certificates.crt"
+    connect_timeout: 10
+    application_name: "myapp-prod"
+    target_session_attrs: "read-write"
+
+  # Staging environment - require SSL but less strict verification
+  staging:
+    host: "${STAGING_DB_HOST}"
+    port: 5432
+    dbname: "${STAGING_DB_NAME}"
+    user: "${STAGING_DB_USER}"
+    password: "${STAGING_DB_PASSWORD}"
+    sslmode: "require"
+    connect_timeout: 10
+    application_name: "myapp-staging"
+
+  # Development environment - local database, relaxed settings
+  development:
+    host: "localhost"
+    port: 5432
+    dbname: "myapp_dev"
+    user: "postgres"
+    password: "${DEV_DB_PASSWORD}"
+    sslmode: "prefer"
+    connect_timeout: 5
+    application_name: "myapp-dev"
+
+  # CI/Test environment - ephemeral database for testing
+  test:
+    host: "localhost"
+    port: 5432
+    dbname: "myapp_test"
+    user: "postgres"
+    password: "test_password"
+    sslmode: "disable"
+    connect_timeout: 5
