@@ -1,0 +1,16 @@
+{
+  "title": "PostgreSQL 15.0 Schema Rules",
+  "properties": {
+    "schema": {
+      "properties": {
+        "tables": {
+          "type": "array",
+          "description": "List of tables in the schema",
+          "items": {
+            "$ref": "components/table.json"
+          }
+        }
+      }
+    }
+  }
+}

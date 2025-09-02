@@ -1,0 +1,940 @@
+{
+  "database": {
+    "engine": "PostgreSQL",
+    "version": "15.0"
+  },
+  "schema": {
+    "id": "8a2e8f50-b29c-42d4-a817-556644330001",
+    "name": "Inventory Management System",
+    "description": null,
+    "snapshot": {
+      "id": "987fcdeb-51d2-43a1-b123-456789abcdef",
+      "label": "v2.1.0",
+      "parent_id": "550e8400-e29b-41d4-a716-446655440000",
+      "created_at": "2024-03-20T14:45:00"
+    },
+    "tables": [
+      {
+        "id": 1,
+        "name": "suppliers",
+        "description": "Table containing supplier information with strict validation constraints",
+        "columns": [
+          {
+            "id": 1,
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the supplier",
+            "constraints": { "nullable": false, "primary_key": true }
+          },
+          {
+            "id": 2,
+            "name": "supplier_code",
+            "type": "text",
+            "description": "Unique supplier identification code",
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": {
+                "name": "min_supplier_code_length",
+                "value": 3
+              },
+              "max_length": {
+                "name": "max_supplier_code_length",
+                "value": 10
+              }
+            }
+          },
+          {
+            "id": 3,
+            "name": "company_name",
+            "type": "text",
+            "description": "Official company name of the supplier",
+            "constraints": {
+              "nullable": false,
+              "min_length": {
+                "name": "min_company_name_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_company_name_length",
+                "value": 100
+              }
+            }
+          },
+          {
+            "id": 4,
+            "name": "contact_person",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "min_length": {
+                "name": "min_contact_person_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_contact_person_length",
+                "value": 75
+              }
+            }
+          },
+          {
+            "id": 5,
+            "name": "phone",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "min_length": {
+                "name": "min_phone_length",
+                "value": 10
+              },
+              "max_length": {
+                "name": "max_phone_length",
+                "value": 20
+              }
+            }
+          },
+          {
+            "id": 6,
+            "name": "email",
+            "type": "text",
+            "constraints": {
+              "nullable": false,
+              "max_length": {
+                "name": "max_email_length",
+                "value": 255
+              }
+            }
+          },
+          {
+            "id": 7,
+            "name": "credit_limit",
+            "type": "integer",
+            "description": "Maximum credit limit in cents",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_credit_limit",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_credit_limit",
+                "value": 10000000
+              }
+            }
+          },
+          {
+            "id": 8,
+            "name": "payment_terms_days",
+            "type": "integer",
+            "description": "Number of days for payment terms",
+            "default": 30,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_payment_terms",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_payment_terms",
+                "value": 365
+              }
+            }
+          },
+          {
+            "id": 9,
+            "name": "is_active",
+            "type": "boolean",
+            "description": "Whether the supplier is currently active",
+            "default": true,
+            "constraints": { "nullable": false }
+          },
+          {
+            "id": 10,
+            "name": "created_at",
+            "type": "timestamp",
+            "description": "When the supplier was added to the system",
+            "default": "current_timestamp",
+            "constraints": { "nullable": false }
+          }
+        ],
+        "constraints": []
+      },
+      {
+        "name": "warehouses",
+        "id": 2,
+        "description": "Physical warehouse locations with capacity constraints",
+        "columns": [
+          {
+            "id": 1,
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the warehouse",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "id": 2,
+            "name": "warehouse_code",
+            "type": "text",
+            "description": "Unique warehouse identification code",
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": {
+                "name": "min_warehouse_code_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_warehouse_code_length",
+                "value": 8
+              }
+            }
+          },
+          {
+            "id": 3,
+            "name": "name",
+            "type": "text",
+            "description": "Warehouse name or location description",
+            "constraints": {
+              "nullable": false,
+              "min_length": {
+                "name": "min_warehouse_name_length",
+                "value": 3
+              },
+              "max_length": {
+                "name": "max_warehouse_name_length",
+                "value": 100
+              }
+            }
+          },
+          {
+            "id": 4,
+            "name": "address",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_address_length",
+                "value": 500
+              }
+            }
+          },
+          {
+            "id": 5,
+            "name": "capacity_cubic_meters",
+            "type": "integer",
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_capacity",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_capacity",
+                "value": 1000000
+              }
+            }
+          },
+          {
+            "id": 6,
+            "name": "manager_name",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_manager_name_length",
+                "value": 100
+              }
+            }
+          },
+          {
+            "id": 7,
+            "name": "temperature_min",
+            "type": "integer",
+            "description": "Minimum temperature in Celsius",
+            "default": -20,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_temperature_min",
+                "value": -50
+              },
+              "max_value": {
+                "name": "max_temperature_min",
+                "value": 50
+              }
+            }
+          },
+          {
+            "id": 8,
+            "name": "temperature_max",
+            "type": "integer",
+            "description": "Maximum temperature in Celsius",
+            "default": 25,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_temperature_max",
+                "value": -50
+              },
+              "max_value": {
+                "name": "max_temperature_max",
+                "value": 50
+              }
+            }
+          },
+          {
+            "id": 9,
+            "name": "is_climate_controlled",
+            "type": "boolean",
+            "description": "Whether warehouse has climate control",
+            "default": false,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 10,
+            "name": "created_at",
+            "type": "timestamp",
+            "description": "When the warehouse was registered",
+            "default": "current_timestamp",
+            "constraints": {
+              "nullable": false
+            }
+          }
+        ],
+        "constraints": []
+      },
+      {
+        "name": "product_categories",
+        "id": 3,
+        "description": "Hierarchical product categories with level constraints",
+        "columns": [
+          {
+            "id": 1,
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the category",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "id": 2,
+            "name": "category_code",
+            "type": "text",
+            "description": "Unique category code for classification",
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": {
+                "name": "min_category_code_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_category_code_length",
+                "value": 15
+              }
+            }
+          },
+          {
+            "id": 3,
+            "name": "name",
+            "type": "text",
+            "description": "Category name",
+            "constraints": {
+              "nullable": false,
+              "min_length": {
+                "name": "min_category_name_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_category_name_length",
+                "value": 80
+              }
+            }
+          },
+          {
+            "id": 4,
+            "name": "description",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_category_description_length",
+                "value": 1000
+              }
+            }
+          },
+          {
+            "id": 5,
+            "name": "parent_category_id",
+            "type": "integer",
+            "default": null
+          },
+          {
+            "id": 6,
+            "name": "level",
+            "type": "integer",
+            "description": "Hierarchy level (0 = root, max 5 levels deep)",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_category_level",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_category_level",
+                "value": 5
+              }
+            }
+          },
+          {
+            "id": 7,
+            "name": "sort_order",
+            "type": "integer",
+            "description": "Display order within the same level",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_sort_order",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_sort_order",
+                "value": 9999
+              }
+            }
+          },
+          {
+            "id": 8,
+            "name": "is_active",
+            "type": "boolean",
+            "description": "Whether the category is currently active",
+            "default": true,
+            "constraints": {
+              "nullable": false
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "id": 1,
+            "name": "fk_parent_category",
+            "type": "foreign_key",
+            "description": "Self-referencing foreign key for category hierarchy",
+            "columns": ["parent_category_id"],
+            "references": {
+              "table": "product_categories",
+              "column": "id"
+            },
+            "on_delete": "set_null",
+            "on_update": "cascade"
+          }
+        ]
+      },
+      {
+        "name": "products",
+        "id": 4,
+        "description": "Product master data with comprehensive validation constraints",
+        "columns": [
+          {
+            "id": 1,
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for the product",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "id": 2,
+            "name": "sku",
+            "type": "text",
+            "description": "Stock Keeping Unit - unique product identifier",
+            "constraints": {
+              "nullable": false,
+              "unique": true,
+              "min_length": {
+                "name": "min_sku_length",
+                "value": 3
+              },
+              "max_length": {
+                "name": "max_sku_length",
+                "value": 30
+              }
+            }
+          },
+          {
+            "id": 3,
+            "name": "name",
+            "type": "text",
+            "description": "Product name",
+            "constraints": {
+              "nullable": false,
+              "min_length": {
+                "name": "min_product_name_length",
+                "value": 2
+              },
+              "max_length": {
+                "name": "max_product_name_length",
+                "value": 150
+              }
+            }
+          },
+          {
+            "id": 4,
+            "name": "description",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "max_length": {
+                "name": "max_product_description_length",
+                "value": 2000
+              }
+            }
+          },
+          {
+            "id": 5,
+            "name": "category_id",
+            "type": "integer",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 6,
+            "name": "supplier_id",
+            "type": "integer",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 7,
+            "name": "unit_cost_cents",
+            "type": "integer",
+            "description": "Unit cost in cents",
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_unit_cost",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_unit_cost",
+                "value": 100000000
+              }
+            }
+          },
+          {
+            "id": 8,
+            "name": "unit_price_cents",
+            "type": "integer",
+            "description": "Selling price in cents",
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_unit_price",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_unit_price",
+                "value": 100000000
+              }
+            }
+          },
+          {
+            "id": 9,
+            "name": "weight_grams",
+            "type": "integer",
+            "description": "Product weight in grams",
+            "constraints": {
+              "nullable": true,
+              "min_value": {
+                "name": "min_weight_grams",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_weight_grams",
+                "value": 1000000
+              }
+            }
+          },
+          {
+            "id": 10,
+            "name": "length_mm",
+            "type": "integer",
+            "description": "Product length in millimeters",
+            "constraints": {
+              "nullable": true,
+              "min_value": {
+                "name": "min_length_mm",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_length_mm",
+                "value": 10000
+              }
+            }
+          },
+          {
+            "id": 11,
+            "name": "width_mm",
+            "type": "integer",
+            "description": "Product width in millimeters",
+            "constraints": {
+              "nullable": true,
+              "min_value": {
+                "name": "min_width_mm",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_width_mm",
+                "value": 10000
+              }
+            }
+          },
+          {
+            "id": 12,
+            "name": "height_mm",
+            "type": "integer",
+            "description": "Product height in millimeters",
+            "constraints": {
+              "nullable": true,
+              "min_value": {
+                "name": "min_height_mm",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_height_mm",
+                "value": 10000
+              }
+            }
+          },
+          {
+            "id": 13,
+            "name": "minimum_stock_level",
+            "type": "integer",
+            "description": "Minimum stock level before reorder",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_minimum_stock",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_minimum_stock",
+                "value": 100000
+              }
+            }
+          },
+          {
+            "id": 14,
+            "name": "maximum_stock_level",
+            "type": "integer",
+            "description": "Maximum stock level to maintain",
+            "default": 1000,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_maximum_stock",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_maximum_stock",
+                "value": 1000000
+              }
+            }
+          },
+          {
+            "id": 15,
+            "name": "shelf_life_days",
+            "type": "integer",
+            "default": null,
+            "constraints": {
+              "min_value": {
+                "name": "min_shelf_life",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_shelf_life",
+                "value": 7300
+              }
+            }
+          },
+          {
+            "id": 16,
+            "name": "barcode",
+            "type": "text",
+            "default": null,
+            "constraints": {
+              "min_length": {
+                "name": "min_barcode_length",
+                "value": 8
+              },
+              "max_length": {
+                "name": "max_barcode_length",
+                "value": 20
+              }
+            }
+          },
+          {
+            "id": 17,
+            "name": "is_active",
+            "type": "boolean",
+            "description": "Whether the product is currently active for sale",
+            "default": true,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 18,
+            "name": "is_fragile",
+            "type": "boolean",
+            "description": "Whether special handling is required",
+            "default": false,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 19,
+            "name": "requires_refrigeration",
+            "type": "boolean",
+            "description": "Whether product needs cold storage",
+            "default": false,
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 20,
+            "name": "created_at",
+            "type": "timestamp",
+            "description": "When the product was added to catalog",
+            "default": "current_timestamp",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 21,
+            "name": "updated_at",
+            "type": "timestamp",
+            "description": "When the product was last updated",
+            "default": "current_timestamp",
+            "constraints": {
+              "nullable": false
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "id": 1,
+            "name": "fk_product_category",
+            "type": "foreign_key",
+            "description": "Foreign key to product categories table",
+            "columns": ["category_id"],
+            "references": {
+              "table": "product_categories",
+              "column": "id"
+            },
+            "on_delete": "restrict",
+            "on_update": "cascade"
+          },
+          {
+            "id": 2,
+            "name": "fk_product_supplier",
+            "type": "foreign_key",
+            "description": "Foreign key to suppliers table",
+            "columns": ["supplier_id"],
+            "references": {
+              "table": "suppliers",
+              "column": "id"
+            },
+            "on_delete": "restrict",
+            "on_update": "cascade"
+          }
+        ]
+      },
+      {
+        "name": "inventory",
+        "id": 5,
+        "description": "Current inventory levels per warehouse with movement tracking",
+        "columns": [
+          {
+            "id": 1,
+            "name": "id",
+            "type": "serial",
+            "description": "Primary key for inventory record",
+            "constraints": {
+              "nullable": false,
+              "primary_key": true
+            }
+          },
+          {
+            "id": 2,
+            "name": "product_id",
+            "type": "integer",
+            "description": "Reference to product",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 3,
+            "name": "warehouse_id",
+            "type": "integer",
+            "description": "Reference to warehouse",
+            "constraints": {
+              "nullable": false
+            }
+          },
+          {
+            "id": 4,
+            "name": "quantity_on_hand",
+            "type": "integer",
+            "description": "Current quantity available",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_quantity_on_hand",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_quantity_on_hand",
+                "value": 1000000
+              }
+            }
+          },
+          {
+            "id": 5,
+            "name": "quantity_reserved",
+            "type": "integer",
+            "description": "Quantity reserved for orders",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_quantity_reserved",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_quantity_reserved",
+                "value": 1000000
+              }
+            }
+          },
+          {
+            "id": 6,
+            "name": "quantity_on_order",
+            "type": "integer",
+            "description": "Quantity on purchase orders",
+            "default": 0,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_quantity_on_order",
+                "value": 0
+              },
+              "max_value": {
+                "name": "max_quantity_on_order",
+                "value": 1000000
+              }
+            }
+          },
+          {
+            "id": 7,
+            "name": "bin_location",
+            "type": "text",
+            "description": "Specific bin/shelf location in warehouse",
+            "constraints": {
+              "nullable": true,
+              "max_length": {
+                "name": "max_bin_location_length",
+                "value": 20
+              }
+            }
+          },
+          {
+            "id": 8,
+            "name": "last_movement_date",
+            "type": "date",
+            "default": "current_date"
+          },
+          {
+            "id": 9,
+            "name": "last_count_date",
+            "type": "date",
+            "default": null
+          },
+          {
+            "id": 10,
+            "name": "cycle_count_frequency_days",
+            "type": "integer",
+            "description": "How often to cycle count this item (in days)",
+            "default": 90,
+            "constraints": {
+              "nullable": false,
+              "min_value": {
+                "name": "min_cycle_count_frequency",
+                "value": 1
+              },
+              "max_value": {
+                "name": "max_cycle_count_frequency",
+                "value": 365
+              }
+            }
+          }
+        ],
+        "constraints": [
+          {
+            "id": 1,
+            "name": "unique_product_warehouse",
+            "type": "unique",
+            "description": "Each product can only have one inventory record per warehouse",
+            "columns": ["product_id", "warehouse_id"]
+          },
+          {
+            "id": 2,
+            "name": "fk_inventory_product",
+            "type": "foreign_key",
+            "description": "Foreign key to products table",
+            "columns": ["product_id"],
+            "references": {
+              "table": "products",
+              "column": "id"
+            },
+            "on_delete": "cascade",
+            "on_update": "cascade"
+          },
+          {
+            "id": 3,
+            "name": "fk_inventory_warehouse",
+            "type": "foreign_key",
+            "description": "Foreign key to warehouses table",
+            "columns": ["warehouse_id"],
+            "references": {
+              "table": "warehouses",
+              "column": "id"
+            },
+            "on_delete": "cascade",
+            "on_update": "cascade"
+          }
+        ]
+      }
+    ]
+  }
+}

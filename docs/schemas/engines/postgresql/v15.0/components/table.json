@@ -1,0 +1,53 @@
+{
+  "title": "PostgreSQL Table Definition",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number",
+      "description": "Unique local identifier for the table",
+      "examples": [1, 2, 3, 4, 5]
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the table",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "minLength": 1,
+      "maxLength": 63,
+      "examples": [
+        "users",
+        "orders",
+        "products",
+        "user_profiles",
+        "order_items"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the table",
+      "examples": [
+        "Table containing user information and authentication data",
+        "Table for storing order details and transaction history",
+        "Table for product listings and inventory management",
+        "Table containing supplier information with strict validation constraints",
+        "Physical warehouse locations with capacity constraints",
+        "Current inventory levels per warehouse with movement tracking"
+      ]
+    },
+    "columns": {
+      "type": "array",
+      "description": "List of columns in the table",
+      "items": {
+        "$ref": "column.json"
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "description": "List of constraints applied to the table",
+      "items": {
+        "$ref": "constraint.json"
+      }
+    }
+  },
+  "required": ["name", "columns"],
+  "additionalProperties": false
+}

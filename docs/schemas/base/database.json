@@ -1,0 +1,22 @@
+{
+  "title": "Database Configuration",
+  "type": "object",
+  "required": ["engine", "version"],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "properties": {
+        "engine": {
+          "type": "string",
+          "description": "The type of database engine used",
+          "const": "PostgreSQL"
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the PostgreSQL database engine",
+          "const": "15.0"
+        }
+      }
+    }
+  ]
+}

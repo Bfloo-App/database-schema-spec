@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Database Schema Specification",
+  "description": "Standardized JSON schema specification for database structure definition and validation. Provides a consistent format for representing database schemas across applications with built-in validation rules",
+  "type": "object",
+  "properties": {
+    "database": {
+      "$ref": "schemas/base/database.json"
+    },
+    "schema": {
+      "$ref": "schemas/base/schema.json"
+    }
+  },
+  "required": ["database", "schema"],
+  "additionalProperties": false,
+  "oneOf": [
+    {
+      "if": {
+        "properties": {
+          "database": {
+            "properties": {
+              "engine": { "const": "PostgreSQL" },
+              "version": { "const": "15.0" }
+            }
+          }
+        }
+      },
+      "then": {
+        "$ref": "schemas/engines/postgresql/v15.0/spec.json"
+      }
+    }
+  ]
+}
