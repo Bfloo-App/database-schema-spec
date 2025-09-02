@@ -1,10 +1,10 @@
-name: "Staging CI/CD - Create Release Candidate Image"
+name: "Create Service Version Images"
 
 on:
   push:
     tags:
-      # Run on every tag matching this pattern (e.g. v1.4.0-rc.1)
-      - "v[0-9]*.[0-9]*.[0-9]*-rc.[0-9]*"
+      # Run on every tag matching this pattern (e.g. v1.4.0)
+      - v[0-9]*.[0-9]*.[0-9]*
 
 permissions:
   contents: read
@@ -17,8 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: quality_checks
     outputs:
-      tags: ${{ steps.meta.outputs.tags }}
-      labels: ${{ steps.meta.outputs.labels }}
+      production-tags: ${{ steps.meta-production.outputs.tags }}
+      staging-tags: ${{ steps.meta-staging.outputs.tags }}
+      labels: ${{ steps.meta-production.outputs.labels }}
 
     steps:
       - name: Checkout code
@@ -26,14 +27,32 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Extract metadata
-        id: meta
+      - name: Extract metadata for production
+        id: meta-production
         uses: docker/metadata-action@v5.8.0
         with:
           images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
           tags: |
             type=ref,event=tag,enable=true
-            type=raw,value=staging-latest
+
+          flavor: |
+            latest=true
+
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.description=${{ github.event.repository.description }}
+            org.opencontainers.image.url=${{ github.event.repository.html_url }}
+            org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+            org.opencontainers.image.version=${{ github.ref_name }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Extract metadata for staging
+        id: meta-staging
+        uses: docker/metadata-action@v5.8.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+          tags: |
+            type=ref,event=tag,enable=true,suffix=-staging
 
           flavor: |
             latest=false
@@ -46,18 +65,23 @@ jobs:
             org.opencontainers.image.version=${{ github.ref_name }}
             org.opencontainers.image.revision=${{ github.sha }}
 
-  build_image:
+  build_images:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: write
+      contents: read
 
-    environment: staging
-    needs: [quality_checks, prepare_metadata]
-    outputs:
-      image-url: ghcr.io/${{ github.repository_owner}}/${{ github.repository }}:${{ github.ref_name }}
-      image-id: ${{ steps.build.outputs.imageid }}
-      digest: ${{ steps.build.outputs.digest }}
+    needs:
+      - quality_checks
+      - prepare_metadata
+
+    strategy:
+      matrix:
+        include:
+          - environment: production
+          - environment: staging
+
+    environment: ${{ matrix.environment }}
 
     steps:
       - name: Checkout code
@@ -95,7 +119,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ needs.prepare_metadata.outputs.tags }}
+          tags: ${{ matrix.environment == 'production' && needs.prepare_metadata.outputs.production-tags || needs.prepare_metadata.outputs.staging-tags }}
           labels: ${{ needs.prepare_metadata.outputs.labels }}
           platforms: linux/amd64
           provenance: false
