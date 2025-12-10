@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Base Project Configuration",
+  "description": "Schema for the common configuration properties shared across all database engines. This schema is used in conjunction with engine-specific configuration schemas.",
+  "type": "object",
+  "definitions": {
+    "envVarString": {
+      "type": "string",
+      "description": "A string value that may contain environment variable references using ${VAR_NAME} syntax. The CLI resolves these at runtime from the environment or .env file.",
+      "examples": ["${API_KEY}", "literal-value", "${MY_VAR}_suffix"]
+    }
+  },
+  "properties": {
+    "schema_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier linking this project to the web application. Generated on first `db sync push` if not present."
+    },
+    "database": {
+      "type": "object",
+      "description": "Database engine configuration (version is tracked per-snapshot in manifest.yaml)",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "description": "Database engine name",
+          "enum": ["PostgreSQL"]
+        }
+      },
+      "required": ["engine"],
+      "additionalProperties": false
+    },
+    "api": {
+      "type": "object",
+      "description": "API configuration for web app synchronization",
+      "properties": {
+        "base_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for the API endpoint",
+          "default": "https://api.yourapp.com"
+        },
+        "key": {
+          "$ref": "#/definitions/envVarString",
+          "description": "API key for authentication. Supports environment variable references (e.g., ${BFLOO_API_KEY}). The CLI resolves env vars from the environment or a .env file located in the config directory or project root."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["database"],
+  "additionalProperties": false
+}

@@ -19,17 +19,24 @@ class TestSchemaGenerationIntegration:
         )
 
         # This should not raise any exceptions
-        generator.run()
+        generator.run_for_testing()
 
         # Verify output structure
         assert temp_output_dir.exists()
 
         # Check for generated schema files
-        postgres_output = temp_output_dir / "postgresql" / "15.0" / "spec.json"
-        mysql_output = temp_output_dir / "mysql" / "8.0" / "spec.json"
+        postgres_output = temp_output_dir / "postgresql" / "v15.0" / "spec.json"
+        mysql_output = temp_output_dir / "mysql" / "v8.0" / "spec.json"
 
         assert postgres_output.exists(), "PostgreSQL schema should be generated"
         assert mysql_output.exists(), "MySQL schema should be generated"
+
+        # Check for project schemas
+        assert (temp_output_dir / "config" / "base.json").exists()
+        assert (temp_output_dir / "config" / "engines" / "postgresql.json").exists()
+        assert (temp_output_dir / "config" / "engines" / "mysql.json").exists()
+        assert (temp_output_dir / "manifest.json").exists()
+        assert (temp_output_dir / "smap.json").exists()
 
         # Verify content quality
         with open(postgres_output) as f:
@@ -38,23 +45,9 @@ class TestSchemaGenerationIntegration:
         with open(mysql_output) as f:
             mysql_schema = json.load(f)
 
-        # Basic schema validation
-        assert postgres_schema.get("type") == "object", (
-            f"Expected 'object', got {postgres_schema.get('type')}"
-        )
-        assert mysql_schema.get("type") == "object", (
-            f"Expected 'object', got {mysql_schema.get('type')}"
-        )
-
-        # Verify basic structure
-        assert "database" in postgres_schema.get("properties", {})
-        assert "schema" in postgres_schema.get("properties", {})
-        assert "database" in mysql_schema.get("properties", {})
-        assert "schema" in mysql_schema.get("properties", {})
-
-        # Verify conditional logic was resolved (no oneOf should remain)
-        assert "oneOf" not in postgres_schema
-        assert "oneOf" not in mysql_schema
+        # Basic schema validation - check they have $id injected
+        assert "$id" in postgres_schema
+        assert "$id" in mysql_schema
 
     def test_schema_generation_with_missing_docs(self, temp_output_dir):
         """Should handle missing documentation directory gracefully."""
@@ -66,12 +59,12 @@ class TestSchemaGenerationIntegration:
         with pytest.raises(SchemaGenerationError):
             generator.run_for_testing()
 
-    def test_schema_generation_with_invalid_specs_file(
+    def test_schema_generation_with_invalid_registry_file(
         self, temp_docs_dir, temp_output_dir
     ):
-        """Should handle invalid specs.json file."""
-        # Corrupt the specs.json file
-        with open(temp_docs_dir / "specs.json", "w") as f:
+        """Should handle invalid _registry_.json file."""
+        # Corrupt the _registry_.json file
+        with open(temp_docs_dir / "schemas" / "_registry_.json", "w") as f:
             f.write("invalid json content")
 
         generator = SchemaGenerator(
@@ -88,17 +81,21 @@ class TestSchemaGenerationIntegration:
         generator = SchemaGenerator(
             docs_path=temp_docs_dir, output_path=temp_output_dir
         )
-        generator.run()
+        generator.run_for_testing()
 
         # Verify directory structure matches expected pattern
         expected_structure = [
-            temp_output_dir / "postgresql" / "15.0",
-            temp_output_dir / "mysql" / "8.0",
+            temp_output_dir / "postgresql" / "v15.0",
+            temp_output_dir / "mysql" / "v8.0",
+            temp_output_dir / "config" / "engines",
         ]
 
         for path in expected_structure:
             assert path.exists(), f"Expected directory {path} should exist"
-            assert (path / "spec.json").exists(), f"spec.json should exist in {path}"
+
+        # Check spec files
+        assert (temp_output_dir / "postgresql" / "v15.0" / "spec.json").exists()
+        assert (temp_output_dir / "mysql" / "v8.0" / "spec.json").exists()
 
     def test_schema_generation_output_content_validity(
         self, temp_docs_dir, temp_output_dir
@@ -109,10 +106,13 @@ class TestSchemaGenerationIntegration:
         generator = SchemaGenerator(
             docs_path=temp_docs_dir, output_path=temp_output_dir
         )
-        generator.run()
+        generator.run_for_testing()
 
         # Check all generated files are valid JSON Schema
         for schema_file in temp_output_dir.rglob("*.json"):
+            if schema_file.name == "smap.json":
+                continue  # smap.json is not a JSON Schema
+
             with open(schema_file) as f:
                 schema_content = json.load(f)
 
@@ -128,51 +128,38 @@ class TestSchemaGenerationIntegration:
         self, temp_docs_dir, temp_output_dir
     ):
         """Should correctly handle multiple database variants."""
-        import json
+        # Add another variant to _registry_.json
+        registry_file = temp_docs_dir / "schemas" / "_registry_.json"
+        with open(registry_file) as f:
+            registry = json.load(f)
 
-        # Add another variant to database.json oneOf (this is what the variant extractor reads)
-        database_file = temp_docs_dir / "schemas" / "base" / "database.json"
-        with open(database_file) as f:
-            database_schema = json.load(f)
-
-        # Add PostgreSQL 14.0 variant to oneOf
-        database_schema["oneOf"].append(
+        # Add PostgreSQL v14.0 variant using oneOf format
+        registry["oneOf"].append(
             {
                 "properties": {
-                    "engine": {
-                        "type": "string",
-                        "description": "The type of database engine used",
-                        "const": "postgresql",
-                    },
-                    "version": {
-                        "type": "string",
-                        "description": "The version of the PostgreSQL database engine",
-                        "const": "14.0",
-                    },
+                    "engine": {"const": "PostgreSQL"},
+                    "version": {"const": "v14.0"},
                 }
             }
         )
 
-        with open(database_file, "w") as f:
-            json.dump(database_schema, f, indent=2)
+        with open(registry_file, "w") as f:
+            json.dump(registry, f, indent=2)
 
-        # Create directory for the new variant
+        # Create directory and spec for the new variant
         postgresql_14_dir = (
             temp_docs_dir / "schemas" / "engines" / "postgresql" / "v14.0"
         )
         postgresql_14_dir.mkdir(parents=True)
 
-        # Create spec.json for the new variant
         with open(postgresql_14_dir / "spec.json", "w") as f:
             json.dump(
                 {
-                    "title": "PostgreSQL 14.0 Schema Rules",
-                    "properties": {
-                        "postgres_14_features": {
-                            "type": "object",
-                            "description": "PostgreSQL 14.0-specific features",
-                        }
-                    },
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "title": "PostgreSQL 14.0 Schema",
+                    "type": "object",
+                    "properties": {"name": {"type": "string"}},
+                    "required": ["name"],
                 },
                 f,
                 indent=2,
@@ -181,41 +168,58 @@ class TestSchemaGenerationIntegration:
         generator = SchemaGenerator(
             docs_path=temp_docs_dir, output_path=temp_output_dir
         )
-        generator.run()
+        generator.run_for_testing()
 
         # Should create output for all variants
-        assert (temp_output_dir / "postgresql" / "15.0" / "spec.json").exists()
-        assert (temp_output_dir / "postgresql" / "14.0" / "spec.json").exists()
-        assert (temp_output_dir / "mysql" / "8.0" / "spec.json").exists()
+        assert (temp_output_dir / "postgresql" / "v15.0" / "spec.json").exists()
+        assert (temp_output_dir / "postgresql" / "v14.0" / "spec.json").exists()
+        assert (temp_output_dir / "mysql" / "v8.0" / "spec.json").exists()
 
-    def test_schema_generation_with_circular_references(
+    def test_schema_generation_schema_map_structure(
         self, temp_docs_dir, temp_output_dir
     ):
-        """Should detect and handle circular references."""
-        # Create a circular reference scenario
-        circular_schema = {"$ref": "circular_ref.json"}
-
-        with open(temp_docs_dir / "schemas" / "base" / "circular_ref.json", "w") as f:
-            json.dump({"$ref": "database.json"}, f)
-
-        # Modify database.json to reference the circular file
-        with open(temp_docs_dir / "schemas" / "base" / "database.json", "w") as f:
-            json.dump(circular_schema, f)
-
+        """Should generate correct smap.json structure."""
         generator = SchemaGenerator(
             docs_path=temp_docs_dir, output_path=temp_output_dir
         )
+        generator.run_for_testing()
 
-        # Should handle circular references gracefully
-        with pytest.raises(SchemaGenerationError, match="circular"):
-            generator.run_for_testing()
+        smap_path = temp_output_dir / "smap.json"
+        assert smap_path.exists()
+
+        with open(smap_path) as f:
+            smap = json.load(f)
+
+        # Check structure
+        assert "project" in smap
+        assert "engines" in smap
+
+        # Check project section
+        assert "manifest" in smap["project"]
+        assert "config" in smap["project"]
+        assert "base" in smap["project"]["config"]
+        assert "engines" in smap["project"]["config"]
+
+        # Check engine configs are present
+        assert "postgresql" in smap["project"]["config"]["engines"]
+        assert "mysql" in smap["project"]["config"]["engines"]
+
+        # Check engine specs are present
+        assert "postgresql" in smap["engines"]
+        assert "mysql" in smap["engines"]
+        assert "v15.0" in smap["engines"]["postgresql"]
+        assert "v8.0" in smap["engines"]["mysql"]
 
     def test_schema_generation_performance_with_large_schema(
         self, temp_docs_dir, temp_output_dir
     ):
         """Should handle large schemas efficiently."""
         # Create a large schema with many properties
-        large_schema = {"type": "object", "properties": {}}
+        large_schema = {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object",
+            "properties": {},
+        }
 
         # Add 100 properties to simulate a large schema
         for i in range(100):
@@ -224,22 +228,12 @@ class TestSchemaGenerationIntegration:
                 "description": f"Property {i}",
             }
 
-        # Add the large schema to the base schemas
-        with open(temp_docs_dir / "schemas" / "base" / "large_schema.json", "w") as f:
+        # Update the PostgreSQL spec with the large schema
+        spec_file = (
+            temp_docs_dir / "schemas" / "engines" / "postgresql" / "v15.0" / "spec.json"
+        )
+        with open(spec_file, "w") as f:
             json.dump(large_schema, f, indent=2)
-
-        # Read existing database.json (don't overwrite the oneOf structure)
-        with open(temp_docs_dir / "schemas" / "base" / "database.json") as f:
-            database_schema = json.load(f)
-
-        # Add a reference to the large schema in properties if not already there
-        if "properties" not in database_schema:
-            database_schema["properties"] = {}
-        database_schema["properties"]["large_schema"] = {"$ref": "large_schema.json"}
-
-        # Write back the modified database schema
-        with open(temp_docs_dir / "schemas" / "base" / "database.json", "w") as f:
-            json.dump(database_schema, f, indent=2)
 
         import time
 
@@ -248,7 +242,7 @@ class TestSchemaGenerationIntegration:
         generator = SchemaGenerator(
             docs_path=temp_docs_dir, output_path=temp_output_dir
         )
-        generator.run_for_testing()  # Use test-friendly version
+        generator.run_for_testing()
 
         end_time = time.time()
         processing_time = end_time - start_time

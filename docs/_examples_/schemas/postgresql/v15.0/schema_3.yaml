@@ -1,0 +1,353 @@
+# Example 3: Inventory & Warehouse Management Schema
+# A complex schema for inventory tracking across multiple warehouses.
+# Demonstrates advanced constraints and multiple foreign key relationships.
+
+name: "Inventory Management System"
+description: "Multi-warehouse inventory tracking with suppliers and products"
+
+tables:
+  - id: 1
+    name: suppliers
+    description: "Product suppliers and vendors"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: code
+        type: text
+        description: "Unique supplier code"
+        constraints:
+          nullable: false
+          min_length:
+            name: "chk_supplier_code_min_len"
+            value: 3
+          max_length:
+            name: "chk_supplier_code_max_len"
+            value: 20
+      - id: 3
+        name: name
+        type: text
+        description: "Company name"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_supplier_name_max_len"
+            value: 200
+      - id: 4
+        name: contact_email
+        type: text
+        constraints:
+          nullable: true
+          max_length:
+            name: "chk_contact_email_max_len"
+            value: 255
+      - id: 5
+        name: is_active
+        type: boolean
+        default: true
+        constraints:
+          nullable: false
+      - id: 6
+        name: created_at
+        type: timestamp
+        default: "current_timestamp"
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_suppliers"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "uq_suppliers_code"
+        type: unique
+        columns: ["code"]
+
+  - id: 2
+    name: warehouses
+    description: "Physical warehouse locations"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: code
+        type: text
+        description: "Unique warehouse code"
+        constraints:
+          nullable: false
+          min_length:
+            name: "chk_warehouse_code_min_len"
+            value: 2
+          max_length:
+            name: "chk_warehouse_code_max_len"
+            value: 10
+      - id: 3
+        name: name
+        type: text
+        description: "Warehouse name"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_warehouse_name_max_len"
+            value: 100
+      - id: 4
+        name: address
+        type: text
+        constraints:
+          nullable: true
+      - id: 5
+        name: capacity_units
+        type: integer
+        description: "Maximum storage capacity in units"
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_capacity_positive"
+            value: 1
+      - id: 6
+        name: is_active
+        type: boolean
+        default: true
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_warehouses"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "uq_warehouses_code"
+        type: unique
+        columns: ["code"]
+
+  - id: 3
+    name: products
+    description: "Product master data"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: sku
+        type: text
+        description: "Stock Keeping Unit"
+        constraints:
+          nullable: false
+          min_length:
+            name: "chk_sku_min_len"
+            value: 3
+          max_length:
+            name: "chk_sku_max_len"
+            value: 50
+      - id: 3
+        name: name
+        type: text
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_product_name_max_len"
+            value: 200
+      - id: 4
+        name: supplier_id
+        type: integer
+        description: "Primary supplier"
+        constraints:
+          nullable: false
+      - id: 5
+        name: unit_cost_cents
+        type: integer
+        description: "Cost per unit in cents"
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_unit_cost_non_negative"
+            value: 0
+      - id: 6
+        name: reorder_point
+        type: integer
+        description: "Minimum stock level before reorder"
+        default: 10
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_reorder_point_non_negative"
+            value: 0
+      - id: 7
+        name: is_active
+        type: boolean
+        default: true
+        constraints:
+          nullable: false
+      - id: 8
+        name: created_at
+        type: timestamp
+        default: "current_timestamp"
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_products"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "uq_products_sku"
+        type: unique
+        columns: ["sku"]
+      - id: 3
+        name: "fk_products_supplier"
+        type: foreign_key
+        columns: ["supplier_id"]
+        references:
+          table: "suppliers"
+          columns: ["id"]
+        on_delete: "restrict"
+        on_update: "no_action"
+
+  - id: 4
+    name: inventory
+    description: "Current stock levels per product per warehouse"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: product_id
+        type: integer
+        constraints:
+          nullable: false
+      - id: 3
+        name: warehouse_id
+        type: integer
+        constraints:
+          nullable: false
+      - id: 4
+        name: quantity_on_hand
+        type: integer
+        default: 0
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_quantity_non_negative"
+            value: 0
+      - id: 5
+        name: quantity_reserved
+        type: integer
+        description: "Quantity reserved for pending orders"
+        default: 0
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_reserved_non_negative"
+            value: 0
+      - id: 6
+        name: bin_location
+        type: text
+        description: "Physical location in warehouse"
+        constraints:
+          nullable: true
+          max_length:
+            name: "chk_bin_location_max_len"
+            value: 50
+      - id: 7
+        name: last_counted_at
+        type: timestamp
+        description: "Last physical inventory count"
+        constraints:
+          nullable: true
+    constraints:
+      - id: 1
+        name: "pk_inventory"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "uq_inventory_product_warehouse"
+        type: unique
+        description: "One inventory record per product per warehouse"
+        columns: ["product_id", "warehouse_id"]
+      - id: 3
+        name: "fk_inventory_product"
+        type: foreign_key
+        columns: ["product_id"]
+        references:
+          table: "products"
+          columns: ["id"]
+        on_delete: "cascade"
+        on_update: "no_action"
+      - id: 4
+        name: "fk_inventory_warehouse"
+        type: foreign_key
+        columns: ["warehouse_id"]
+        references:
+          table: "warehouses"
+          columns: ["id"]
+        on_delete: "cascade"
+        on_update: "no_action"
+
+  - id: 5
+    name: stock_movements
+    description: "Audit trail of inventory changes"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: inventory_id
+        type: integer
+        constraints:
+          nullable: false
+      - id: 3
+        name: quantity_change
+        type: integer
+        description: "Positive for additions, negative for removals"
+        constraints:
+          nullable: false
+      - id: 4
+        name: reason
+        type: text
+        description: "Reason for stock movement"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_reason_max_len"
+            value: 100
+      - id: 5
+        name: reference_number
+        type: text
+        description: "External reference (PO number, shipment ID, etc.)"
+        constraints:
+          nullable: true
+          max_length:
+            name: "chk_reference_max_len"
+            value: 50
+      - id: 6
+        name: created_at
+        type: timestamp
+        default: "current_timestamp"
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_stock_movements"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "fk_stock_movements_inventory"
+        type: foreign_key
+        columns: ["inventory_id"]
+        references:
+          table: "inventory"
+          columns: ["id"]
+        on_delete: "cascade"
+        on_update: "no_action"
