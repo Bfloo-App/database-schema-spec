@@ -28,7 +28,7 @@ class VariantExtractor:
         self.resolver = resolver
 
     def extract_variants(self) -> list[DatabaseVariantSpec]:
-        """Extract all database variants from the database schema file.
+        """Extract all database variants from the database registry file.
 
         Returns:
             List of DatabaseVariantSpec objects representing all variants
@@ -37,16 +37,16 @@ class VariantExtractor:
             VariantExtractionError: If variants cannot be extracted
         """
         try:
-            # Load the database schema file
+            # Load the database registry file
             database_schema = self.resolver.resolve_file(
-                config.file_names.database_schema_file
+                config.file_names.database_registry_file
             )
 
             # Extract oneOf items
             oneof_items = database_schema.get(config.json_schema_fields.oneof_field, [])
             if not isinstance(oneof_items, list):
                 raise VariantExtractionError(
-                    f"Invalid oneOf structure in {config.file_names.database_schema_file}"
+                    f"Invalid oneOf structure in {config.file_names.database_registry_file}"
                 )
 
             # Parse each oneOf item to extract variants
@@ -54,7 +54,7 @@ class VariantExtractor:
 
             if not variants:
                 raise VariantExtractionError(
-                    f"No variants found in {config.file_names.database_schema_file}"
+                    f"No variants found in {config.file_names.database_registry_file}"
                 )
 
             return variants
@@ -63,7 +63,7 @@ class VariantExtractor:
             if isinstance(e, VariantExtractionError):
                 raise
             raise VariantExtractionError(
-                f"Failed to extract variants from {config.file_names.database_schema_file}: {e}"
+                f"Failed to extract variants from {config.file_names.database_registry_file}: {e}"
             ) from e
 
     def parse_oneof_block(self, oneof_items: list[Any]) -> list[DatabaseVariantSpec]:

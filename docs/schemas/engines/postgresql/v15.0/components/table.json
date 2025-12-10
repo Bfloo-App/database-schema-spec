@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "id": {
-      "type": "number",
+      "type": "integer",
       "description": "Unique local identifier for the table",
       "examples": [1, 2, 3, 4, 5]
     },
@@ -13,17 +13,12 @@
       "pattern": "^[a-z][a-z0-9_]*$",
       "minLength": 1,
       "maxLength": 63,
-      "examples": [
-        "users",
-        "orders",
-        "products",
-        "user_profiles",
-        "order_items"
-      ]
+      "examples": ["users", "orders", "products", "user_profiles", "order_items"]
     },
     "description": {
       "type": "string",
       "description": "Description of the table",
+      "maxLength": 256,
       "examples": [
         "Table containing user information and authentication data",
         "Table for storing order details and transaction history",
@@ -48,6 +43,6 @@
       }
     }
   },
-  "required": ["name", "columns"],
+  "required": ["id", "name", "columns"],
   "additionalProperties": false
 }

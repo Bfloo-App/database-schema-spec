@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "id": {
-      "type": "number",
+      "type": "integer",
       "description": "Unique local identifier for the column",
       "examples": [1, 2, 3, 4, 5]
     },
@@ -42,6 +42,7 @@
     "description": {
       "type": "string",
       "description": "Description of the column",
+      "maxLength": 256,
       "examples": [
         "Primary key",
         "Username of the user",
@@ -63,16 +64,8 @@
       ]
     },
     "default": {
-      "type": ["string", "number", "boolean", "null"],
-      "description": "Default value for the column",
-      "examples": [
-        12,
-        "default value",
-        true,
-        "current_timestamp",
-        "current_date",
-        null
-      ]
+      "type": ["string", "integer", "boolean", "null"],
+      "description": "Default value for the column"
     },
     "constraints": {
       "type": "object",
@@ -82,22 +75,12 @@
           "type": "boolean",
           "description": "Whether the column can be null",
           "default": true
-        },
-        "unique": {
-          "type": "boolean",
-          "description": "Whether the column must have unique values",
-          "default": false
-        },
-        "primary_key": {
-          "type": "boolean",
-          "description": "Whether the column is a primary key",
-          "default": false
         }
       },
       "additionalProperties": false
     }
   },
-  "required": ["name", "type"],
+  "required": ["id", "name", "type"],
   "allOf": [
     {
       "if": {
@@ -123,7 +106,7 @@
                     "maxLength": 63
                   },
                   "value": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Minimum length value"
                   }
                 },
@@ -142,7 +125,7 @@
                     "maxLength": 63
                   },
                   "value": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Maximum length value"
                   }
                 },
@@ -178,7 +161,7 @@
                     "maxLength": 63
                   },
                   "value": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Minimum value"
                   }
                 },
@@ -197,7 +180,7 @@
                     "maxLength": 63
                   },
                   "value": {
-                    "type": "number",
+                    "type": "integer",
                     "description": "Maximum value"
                   }
                 },
@@ -222,7 +205,9 @@
         "properties": {
           "constraints": {
             "properties": {
-              "nullable": false
+              "nullable": {
+                "const": true
+              }
             }
           }
         }
@@ -278,7 +263,7 @@
       "then": {
         "properties": {
           "default": {
-            "oneOf": [{ "type": "number" }, { "const": null }]
+            "oneOf": [{ "type": "integer" }, { "const": null }]
           }
         }
       }
@@ -303,20 +288,30 @@
       "if": {
         "properties": {
           "type": {
-            "enum": ["date", "timestamp"]
+            "const": "date"
           }
         }
       },
       "then": {
         "properties": {
           "default": {
-            "oneOf": [
-              {
-                "type": "string",
-                "enum": ["current_date", "current_timestamp"]
-              },
-              { "const": null }
-            ]
+            "oneOf": [{ "const": "current_date" }, { "const": null }]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "timestamp"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "default": {
+            "oneOf": [{ "const": "current_timestamp" }, { "const": null }]
           }
         }
       }
@@ -331,93 +326,7 @@
       },
       "then": {
         "properties": {
-          "default": false,
-          "constraints": {
-            "properties": {
-              "nullable": false,
-              "unique": false
-            }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "constraints": {
-            "properties": {
-              "primary_key": {
-                "const": true
-              }
-            },
-            "required": ["primary_key"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "constraints": {
-            "properties": {
-              "nullable": false,
-              "unique": false
-            }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "constraints": {
-            "properties": {
-              "nullable": {
-                "const": true
-              }
-            },
-            "required": ["nullable"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "type": {
-            "not": {
-              "const": "serial"
-            }
-          },
-          "constraints": {
-            "properties": {
-              "primary_key": false
-            }
-          }
-        }
-      }
-    },
-    {
-      "if": {
-        "properties": {
-          "constraints": {
-            "properties": {
-              "unique": {
-                "const": true
-              }
-            },
-            "required": ["unique"]
-          }
-        }
-      },
-      "then": {
-        "properties": {
-          "type": {
-            "not": {
-              "const": "serial"
-            }
-          },
-          "constraints": {
-            "properties": {
-              "primary_key": false
-            }
-          }
+          "default": false
         }
       }
     }

@@ -1,4 +1,4 @@
-"""JSON Schema reference resolver with variant-aware oneOf resolution."""
+"""JSON Schema reference resolver."""
 
 from __future__ import annotations
 
@@ -10,18 +10,16 @@ from database_schema_spec.core.config import config
 from database_schema_spec.core.exceptions import (
     CircularReferenceError,
     ReferenceResolutionError,
-    ValidationError,
 )
 from database_schema_spec.core.schemas import DatabaseVariantSpec
 from database_schema_spec.logger import logger
-from database_schema_spec.resolution.conditional_merger import ConditionalMerger
 
 
 class JSONRefResolver:
-    """Handles JSON Schema $ref reference resolution with variant-aware oneOf resolution.
+    """Handles JSON Schema $ref reference resolution.
 
     This resolver processes JSON Schema files and resolves all $ref references,
-    with special handling for oneOf conditional blocks based on database variants.
+    inlining the referenced content to produce a self-contained schema.
     """
 
     def __init__(
@@ -33,7 +31,7 @@ class JSONRefResolver:
 
         Args:
             base_path: Base directory for resolving relative references
-            current_variant: Database variant for conditional oneOf resolution
+            current_variant: Database variant (kept for interface compatibility)
         """
         self.base_path = base_path
         self.current_variant = current_variant
@@ -59,9 +57,6 @@ class JSONRefResolver:
         self.resolution_stack.append(ref_path)
         try:
             referenced_content = self.load_referenced_file(ref_path, current_file)
-            referenced_content = self.resolve_oneof_for_variant(
-                referenced_content, ref_path
-            )
             new_current_file = self._get_new_current_file(current_file, ref_path)
             resolved_content = self.resolve_references(
                 referenced_content, new_current_file
@@ -164,43 +159,6 @@ class JSONRefResolver:
             raise ReferenceResolutionError(ref_path, e)
         except Exception as e:
             raise ReferenceResolutionError(ref_path, e)
-
-    def resolve_oneof_for_variant(
-        self, schema: dict[str, Any], schema_path: str
-    ) -> dict[str, Any]:
-        """Resolve oneOf blocks for target variant if applicable.
-
-        This method applies conditional logic to oneOf blocks found in referenced files
-        to resolve them to the appropriate variant-specific schema.
-
-        Args:
-            schema: Schema to process
-            schema_path: Path to the schema file
-
-        Returns:
-            Processed schema with oneOf blocks resolved for the target variant
-        """
-        # If no target variant is set, return schema unchanged
-        if not self.current_variant:
-            return schema
-
-        # If schema doesn't have oneOf blocks, return unchanged
-        if config.json_schema_fields.oneof_field not in schema:
-            return schema
-
-        # Create a conditional merger to resolve oneOf blocks
-        merger: ConditionalMerger = ConditionalMerger(self)
-
-        # Apply conditional logic to resolve oneOf block for our target variant
-        try:
-            resolved_schema = merger.apply_conditional_logic(
-                schema, self.current_variant
-            )
-            return resolved_schema
-        except ValidationError:
-            # If no matching condition found, just return original schema
-            # This allows oneOf blocks that don't apply to this variant to pass through
-            return schema
 
     def resolve_file(self, file_path: str) -> dict[str, Any]:
         """Load and resolve a JSON file with all $ref references resolved.

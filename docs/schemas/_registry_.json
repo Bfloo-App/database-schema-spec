@@ -1,0 +1,16 @@
+{
+  "$comment": "Registry of supported database engine/version combinations. Used by the generator to discover variants and produce per-engine-version spec.json files. This file is internal and not published to output.",
+  "title": "Database Engine Registry",
+  "oneOf": [
+    {
+      "properties": {
+        "engine": {
+          "const": "PostgreSQL"
+        },
+        "version": {
+          "const": "v15.0"
+        }
+      }
+    }
+  ]
+}

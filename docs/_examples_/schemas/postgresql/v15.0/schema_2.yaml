@@ -1,0 +1,298 @@
+# Example 2: E-commerce Platform Schema
+# A comprehensive schema with users, products, orders, and order items.
+# Demonstrates foreign keys, cascading deletes, and various constraints.
+
+name: "E-commerce Platform"
+description: "Complete e-commerce database with users, products, and orders"
+
+tables:
+  - id: 1
+    name: users
+    description: "Customer accounts"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        description: "Primary key"
+        constraints:
+          nullable: false
+      - id: 2
+        name: email
+        type: text
+        description: "User email address"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_email_max_len"
+            value: 255
+      - id: 3
+        name: full_name
+        type: text
+        description: "User's full name"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_fullname_max_len"
+            value: 100
+      - id: 4
+        name: created_at
+        type: timestamp
+        default: "current_timestamp"
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_users"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "uq_users_email"
+        type: unique
+        columns: ["email"]
+
+  - id: 2
+    name: categories
+    description: "Product categories with hierarchical support"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: name
+        type: text
+        description: "Category name"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_category_name_max_len"
+            value: 100
+      - id: 3
+        name: parent_id
+        type: integer
+        description: "Parent category for hierarchy"
+        constraints:
+          nullable: true
+    constraints:
+      - id: 1
+        name: "pk_categories"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "fk_categories_parent"
+        type: foreign_key
+        description: "Self-referencing for category hierarchy"
+        columns: ["parent_id"]
+        references:
+          table: "categories"
+          columns: ["id"]
+        on_delete: "set_null"
+        on_update: "no_action"
+
+  - id: 3
+    name: products
+    description: "Product catalog"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: sku
+        type: text
+        description: "Stock Keeping Unit"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_sku_max_len"
+            value: 50
+      - id: 3
+        name: name
+        type: text
+        description: "Product name"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_product_name_max_len"
+            value: 200
+      - id: 4
+        name: description
+        type: text
+        description: "Product description"
+        constraints:
+          nullable: true
+      - id: 5
+        name: price_cents
+        type: integer
+        description: "Price in cents"
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_price_positive"
+            value: 0
+      - id: 6
+        name: category_id
+        type: integer
+        description: "Product category"
+        constraints:
+          nullable: true
+      - id: 7
+        name: stock_quantity
+        type: integer
+        default: 0
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_stock_non_negative"
+            value: 0
+      - id: 8
+        name: is_available
+        type: boolean
+        default: true
+        constraints:
+          nullable: false
+      - id: 9
+        name: created_at
+        type: timestamp
+        default: "current_timestamp"
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_products"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "uq_products_sku"
+        type: unique
+        columns: ["sku"]
+      - id: 3
+        name: "fk_products_category"
+        type: foreign_key
+        columns: ["category_id"]
+        references:
+          table: "categories"
+          columns: ["id"]
+        on_delete: "set_null"
+        on_update: "no_action"
+
+  - id: 4
+    name: orders
+    description: "Customer orders"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: user_id
+        type: integer
+        description: "Customer who placed the order"
+        constraints:
+          nullable: false
+      - id: 3
+        name: status
+        type: text
+        default: "pending"
+        constraints:
+          nullable: false
+          max_length:
+            name: "chk_status_max_len"
+            value: 20
+      - id: 4
+        name: total_cents
+        type: integer
+        description: "Order total in cents"
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_total_non_negative"
+            value: 0
+      - id: 5
+        name: created_at
+        type: timestamp
+        default: "current_timestamp"
+        constraints:
+          nullable: false
+    constraints:
+      - id: 1
+        name: "pk_orders"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "fk_orders_user"
+        type: foreign_key
+        columns: ["user_id"]
+        references:
+          table: "users"
+          columns: ["id"]
+        on_delete: "cascade"
+        on_update: "no_action"
+
+  - id: 5
+    name: order_items
+    description: "Individual items within orders"
+    columns:
+      - id: 1
+        name: id
+        type: serial
+        constraints:
+          nullable: false
+      - id: 2
+        name: order_id
+        type: integer
+        constraints:
+          nullable: false
+      - id: 3
+        name: product_id
+        type: integer
+        constraints:
+          nullable: false
+      - id: 4
+        name: quantity
+        type: integer
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_quantity_positive"
+            value: 1
+      - id: 5
+        name: unit_price_cents
+        type: integer
+        description: "Price at time of purchase"
+        constraints:
+          nullable: false
+          min_value:
+            name: "chk_unit_price_non_negative"
+            value: 0
+    constraints:
+      - id: 1
+        name: "pk_order_items"
+        type: primary_key
+        columns: ["id"]
+      - id: 2
+        name: "fk_order_items_order"
+        type: foreign_key
+        columns: ["order_id"]
+        references:
+          table: "orders"
+          columns: ["id"]
+        on_delete: "cascade"
+        on_update: "no_action"
+      - id: 3
+        name: "fk_order_items_product"
+        type: foreign_key
+        columns: ["product_id"]
+        references:
+          table: "products"
+          columns: ["id"]
+        on_delete: "restrict"
+        on_update: "no_action"
+      - id: 4
+        name: "uq_order_product"
+        type: unique
+        description: "Each product appears once per order"
+        columns: ["order_id", "product_id"]

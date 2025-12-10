@@ -71,11 +71,29 @@ database-schema-spec/
 │   ├── resolution/                 # Schema resolution logic
 │   └── validation/                 # Schema validation
 ├── docs/                           # Input schema files
-│   ├── specs.json                  # Main schema file
-│   └── schemas/                    # Schema definitions
+│   └── schemas/
+│       ├── _registry_.json         # Engine/version registry
+│       ├── project/
+│       │   ├── manifest.json       # Snapshot manifest schema
+│       │   └── config/
+│       │       ├── base.json       # Common config schema
+│       │       └── engines/
+│       │           └── postgresql.json  # PostgreSQL connection config
+│       └── engines/
+│           └── postgresql/
+│               └── v15.0/          # Version-specific spec
+│                   ├── spec.json
+│                   └── components/
 └── output/                         # Generated output files
-    ├── vmap.json                   # Version mapping
-    └── postgresql/                 # Database-specific outputs
+    ├── smap.json                   # Schema map (discovery file)
+    ├── manifest.json               # Manifest schema with $id
+    ├── config/
+    │   ├── base.json               # Base config with $id
+    │   └── engines/
+    │       └── postgresql.json     # PostgreSQL config with $id
+    └── postgresql/
+        └── v15.0/
+            └── spec.json           # Fully resolved spec with $id
 ```
 
 ## 🧪 Development
@@ -131,24 +149,52 @@ The application can be configured through:
 
 ### Default Paths
 
-- **Input Directory**: `docs/` (contains source schema files)
+- **Input Directory**: `docs/schemas/` (contains source schema files)
 - **Output Directory**: `output/` (generated files are written here)
-- **Root Schema File**: `docs/specs.json`
+- **Registry File**: `docs/schemas/_registry_.json` (engine/version registry)
 
 ## 📤 Output
 
 The generator creates:
 
-- **Unified Schema Files**: Consolidated schemas for each database variant
-- **Version Map** (`vmap.json`): Mapping of available database versions
-- **Database-Specific Directories**: Organized by engine and version
+- **Schema Map** (`smap.json`): Discovery file mapping all available schemas
+- **Project Schemas**: Config and manifest schemas with injected `$id` fields
+- **Engine Specs**: Fully resolved database-specific schemas organized by engine and version
 
 Example output structure:
 
 ```
 output/
-├── vmap.json
+├── smap.json                   # Schema map for discovery
+├── manifest.json               # Manifest schema
+├── config/
+│   ├── base.json               # Base config schema
+│   └── engines/
+│       └── postgresql.json     # PostgreSQL config schema
 └── postgresql/
-    └── 15.0/
-        └── spec.json
+    └── v15.0/
+        └── spec.json           # PostgreSQL 15.0 spec
+```
+
+### Schema Map (smap.json)
+
+The schema map provides a structured index of all generated schemas:
+
+```json
+{
+  "project": {
+    "manifest": "https://example.com/schemas/manifest.json",
+    "config": {
+      "base": "https://example.com/schemas/config/base.json",
+      "engines": {
+        "postgresql": "https://example.com/schemas/config/engines/postgresql.json"
+      }
+    }
+  },
+  "engines": {
+    "postgresql": {
+      "v15.0": "https://example.com/schemas/postgresql/v15.0/spec.json"
+    }
+  }
+}
 ```

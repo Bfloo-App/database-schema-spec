@@ -24,8 +24,7 @@ def test_resolve_references_with_ref(monkeypatch):
         assert ref_path == "other.json"
         return referenced
 
-    resolver.load_referenced_file = fake_load_referenced_file
-    resolver.resolve_oneof_for_variant = lambda schema, schema_path: schema
+    resolver.load_referenced_file = fake_load_referenced_file  # type: ignore[method-assign]
     result = resolver.resolve_references(schema)
     assert "bar" in result["properties"]
     assert result["extra"] == 1

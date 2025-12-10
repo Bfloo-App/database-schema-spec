@@ -11,8 +11,11 @@ from .exceptions import ConfigurationError
 class FileNamesConfig(BaseModel):
     """Configuration for file names."""
 
-    root_schema_file: str = "specs.json"
-    database_schema_file: str = "schemas/base/database.json"
+    database_registry_file: str = "schemas/_registry_.json"
+    engine_spec_pattern: str = "schemas/engines/{engine}/{version}/spec.json"
+    project_config_base_schema: str = "schemas/project/config/base.json"
+    project_config_engine_pattern: str = "schemas/project/config/engines/{engine}.json"
+    project_manifest_schema: str = "schemas/project/manifest.json"
 
 
 class JSONSchemaFieldsConfig(BaseModel):
