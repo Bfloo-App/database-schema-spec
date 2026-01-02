@@ -1,0 +1,89 @@
+# Example manifest.yml for snapshot tracking
+# This file tracks all schema snapshots with their metadata.
+# Located at .bfloo/<schema>/manifest.yml
+# Managed by the CLI - typically not edited manually.
+#
+# This example shows manifests for three different schemas:
+# - users: User Management (schema_1)
+# - ecommerce: E-commerce Platform (schema_2)
+# - inventory: Inventory Management (schema_3)
+
+# ============================================================================
+# USERS SCHEMA MANIFEST (.bfloo/users/manifest.yml)
+# ============================================================================
+# Simple schema with single table, showing basic snapshot progression
+
+snapshots:
+  # Initial users schema (synced, done)
+  "123e4567-e89b-12d3-a456-426614174000":
+    label: "v1.0.0"
+    parent-id: null
+    status: "done"
+    database-version: "v15.0"
+    created-at: "2024-01-15T10:30:00Z"
+    file: "2024-01-15_v1.0.0.yml"
+    content-hash: "sha256:a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2"
+    sync-state: "synced"
+    synced-at: "2024-01-15T10:35:00Z"
+
+# ============================================================================
+# E-COMMERCE SCHEMA MANIFEST (.bfloo/ecommerce/manifest.yml)
+# ============================================================================
+# Complex schema showing version progression and branching
+
+# snapshots:
+#   # Initial e-commerce schema with users and products (synced, done)
+#   "234e5678-f90a-23e4-b567-537725285111":
+#     label: "v1.0.0"
+#     parent-id: null
+#     status: "done"
+#     database-version: "v15.0"
+#     created-at: "2024-02-01T09:00:00Z"
+#     file: "2024-02-01_v1.0.0.yml"
+#     content-hash: "sha256:b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3"
+#     sync-state: "synced"
+#     synced-at: "2024-02-01T09:05:00Z"
+#
+#   # Full e-commerce with orders (current, draft)
+#   "345f6789-a01b-34f5-c678-648836396222":
+#     label: "v2.0.0"
+#     parent-id: "234e5678-f90a-23e4-b567-537725285111"
+#     status: "draft"
+#     database-version: "v15.0"
+#     created-at: "2024-02-20T14:15:00Z"
+#     file: "current"
+#     content-hash: "sha256:c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4"
+#     sync-state: "local-only"
+#     synced-at: null
+
+# ============================================================================
+# INVENTORY SCHEMA MANIFEST (.bfloo/inventory/manifest.yml)
+# ============================================================================
+# Multi-table schema with foreign key relationships
+
+# snapshots:
+#   # Initial inventory system (synced, done)
+#   "456f7890-b12c-45f6-d789-759947407333":
+#     label: "v1.0.0"
+#     parent-id: null
+#     status: "done"
+#     database-version: "v15.0"
+#     created-at: "2024-03-10T09:45:00Z"
+#     file: "2024-03-10_v1.0.0.yml"
+#     content-hash: "sha256:d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5"
+#     sync-state: "synced"
+#     synced-at: "2024-03-10T09:50:00Z"
+
+# ============================================================================
+# SNAPSHOT TREE VISUALIZATION
+# ============================================================================
+#
+# users:
+#   v1.0.0 (done, synced) ← current
+#
+# ecommerce:
+#   v1.0.0 (done, synced)
+#   └── v2.0.0 (draft, local-only) ← current
+#
+# inventory:
+#   v1.0.0 (done, synced) ← current

@@ -1,0 +1,9 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "PostgreSQL v15.0 Tables Schema",
+	"description": "Schema for validating tables array structure for PostgreSQL v15.0. Used by AI agents to understand table syntax.",
+	"type": "array",
+	"items": {
+		"$ref": "components/table.json"
+	}
+}
