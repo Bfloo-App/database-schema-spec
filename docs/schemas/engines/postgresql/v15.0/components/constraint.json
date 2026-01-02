@@ -5,6 +5,7 @@
     "id": {
       "type": "integer",
       "description": "Unique local identifier for the constraint",
+      "minimum": 1,
       "examples": [1, 2, 3, 4, 5]
     },
     "name": {
@@ -79,8 +80,7 @@
                 "type": "string",
                 "description": "Name of the referenced table",
                 "pattern": "^[a-z][a-z0-9_]*$",
-                "minLength": 1,
-                "maxLength": 63,
+                "minLength": 1,                "maxLength": 63,
                 "examples": ["users", "orders", "products"]
               },
               "columns": {
@@ -102,12 +102,14 @@
             "type": "string",
             "description": "Action to take when referenced row is deleted",
             "enum": ["cascade", "set_null", "set_default", "restrict", "no_action"],
+            "default": "no_action",
             "examples": ["cascade", "set_null", "restrict"]
           },
           "on_update": {
             "type": "string",
             "description": "Action to take when referenced row is updated",
             "enum": ["cascade", "set_null", "set_default", "restrict", "no_action"],
+            "default": "no_action",
             "examples": ["cascade", "set_null", "restrict"]
           }
         },

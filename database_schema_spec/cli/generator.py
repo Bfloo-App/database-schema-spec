@@ -94,34 +94,22 @@ class SchemaGenerator:
         # Collect unique engine names for config generation
         engines: list[str] = list({v.engine for v in variants})
 
-        # Generate schema for each variant
+        # Generate schemas for each variant
         generated_files: list[Path] = []
         for variant in variants:
-            logger.info("Generating schema for %s %s", variant.engine, variant.version)
-            file_path = self.generate_variant(variant)
-            generated_files.append(file_path)
+            logger.info("Generating schemas for %s %s", variant.engine, variant.version)
+            file_paths = self.generate_variant(variant)
+            generated_files.extend(file_paths)
 
         # Generate project schemas
         logger.info("Generating project schemas...")
 
-        # Generate base config schema
-        base_config_path = self.output_manager.write_project_schema(
-            config.file_names.project_config_base_schema,
-            "config/base.json",
-            config.base_url,
-        )
-        generated_files.append(base_config_path)
-        logger.info("Base config schema written to: %s", base_config_path)
-
-        # Generate engine-specific config schemas
+        # Generate fully-resolved engine config schemas
         for engine in engines:
-            engine_lower = engine.lower()
-            source_path = config.file_names.project_config_engine_pattern.format(
-                engine=engine_lower
-            )
-            output_path = f"config/engines/{engine_lower}.json"
-            engine_config_path = self.output_manager.write_project_schema(
-                source_path, output_path, config.base_url
+            engine_config_path = self.output_manager.write_resolved_engine_config(
+                engine,
+                config.file_names.project_config_base_schema,
+                config.base_url,
             )
             generated_files.append(engine_config_path)
             logger.info(
@@ -143,51 +131,69 @@ class SchemaGenerator:
 
         return generated_files
 
-    def generate_variant(self, variant: DatabaseVariantSpec) -> Path:
-        """Generate unified schema for a specific database variant.
+    def generate_variant(self, variant: DatabaseVariantSpec) -> list[Path]:
+        """Generate unified schemas for a specific database variant.
+
+        Generates three schema files per variant:
+        - tables.json: Tables array schema (for AI agents)
+        - snapshot/stored.json: Stored snapshot schema (for CLI)
+        - snapshot/working.json: Working snapshot schema (for CLI)
 
         Args:
             variant: Database variant to generate schema for
 
         Returns:
-            Path where the schema was written
+            List of paths where schemas were written
         """
-        # Build path to engine-specific spec file
-        spec_path = config.file_names.engine_spec_pattern.format(
-            engine=variant.engine.lower(),
-            version=variant.version,
-        )
+        generated_files: list[Path] = []
 
-        # Create a variant-aware resolver and load the spec directly
-        variant_resolver = JSONRefResolver(self.docs_path, variant)
-        unified_schema = variant_resolver.resolve_file(spec_path)
+        # Schema types to generate: (source_pattern_attr, output_type)
+        schema_types = [
+            ("engine_tables_pattern", "tables"),
+            ("engine_snapshot_stored_pattern", "snapshot/stored"),
+            ("engine_snapshot_working_pattern", "snapshot/working"),
+        ]
 
-        # Inject dynamic $id derived from BASE_URL for the final output
-        id_field = config.json_schema_fields.id_field
-        schema_field = config.json_schema_fields.schema_field
-        spec_url = self.output_manager._get_spec_url(
-            variant.engine, variant.version, config.base_url
-        )
+        for pattern_attr, schema_type in schema_types:
+            # Build path to source schema file
+            pattern = getattr(config.file_names, pattern_attr)
+            source_path = pattern.format(
+                engine=variant.engine.lower(),
+                version=variant.version,
+            )
 
-        # Set/override $id
-        unified_schema[id_field] = spec_url
+            # Create a variant-aware resolver and load the schema
+            variant_resolver = JSONRefResolver(self.docs_path, variant)
+            unified_schema = variant_resolver.resolve_file(source_path)
 
-        # Reorder top-level keys to ensure `$id` appears immediately after `$schema`
-        unified_schema = self._reorder_schema_keys(
-            unified_schema, id_field, schema_field
-        )
+            # Inject dynamic $id derived from BASE_URL for the final output
+            id_field = config.json_schema_fields.id_field
+            schema_field = config.json_schema_fields.schema_field
+            schema_url = self.output_manager._get_engine_schema_url(
+                variant.engine, variant.version, schema_type, config.base_url
+            )
 
-        # Validate the resulting schema
-        validation_result = self.validator.validate_schema(unified_schema)
-        if not validation_result.is_valid:
-            raise ValidationError(validation_result.errors)
+            # Set/override $id
+            unified_schema[id_field] = schema_url
 
-        # Write the schema to output file
-        output_path = self.output_manager.write_schema(
-            unified_schema, variant.engine, variant.version
-        )
+            # Reorder top-level keys to ensure `$id` appears immediately after `$schema`
+            unified_schema = self._reorder_schema_keys(
+                unified_schema, id_field, schema_field
+            )
 
-        return output_path
+            # Validate the resulting schema
+            validation_result = self.validator.validate_schema(unified_schema)
+            if not validation_result.is_valid:
+                raise ValidationError(validation_result.errors)
+
+            # Write the schema to output file
+            output_path = self.output_manager.write_engine_schema(
+                unified_schema, variant.engine, variant.version, schema_type
+            )
+            generated_files.append(output_path)
+            logger.info("  %s schema written to: %s", schema_type, output_path)
+
+        return generated_files
 
     def _reorder_schema_keys(
         self, schema: dict, id_field: str, schema_field: str

@@ -2,6 +2,36 @@
 
 A Python package for generating unified JSON documentation files for database schemas by resolving JSON Schema references and handling oneOf variants. This tool processes modular database schema specifications and generates consolidated documentation for different database engines and versions.
 
+## User Project Structure
+
+The generated schemas are designed to validate user projects with this structure:
+
+```
+my-project/
+├── .bfloo/                                    # Hidden config directory (like .git)
+│   ├── config.yml                            # All schemas configuration
+│   ├── orders/                               # Schema: "orders"
+│   │   ├── manifest.yml                      # Snapshot registry
+│   │   └── 2024-01-15_v1.0.0.yml             # Snapshot files
+│   ├── users/                                # Schema: "users"
+│   │   └── manifest.yml
+│   └── analytics/                            # Schema: "analytics"
+│       └── manifest.yml
+├── schemas/                                  # Custom directory (via dir: "schemas")
+│   ├── orders.yml                            # Working schema for "orders"
+│   └── users.yml                             # Working schema for "users"
+└── db-schemas/
+    └── analytics.yml                         # Working schema at root (dir omitted)
+```
+
+**Key concepts:**
+
+- **Schema names are user-defined** - `orders`, `users`, `analytics`, etc.
+- **Flat structure** - Each schema is a top-level entry (no nested hierarchy)
+- **One manifest per schema** - Each schema has its own snapshot history in `.bfloo/<schema>/`
+- **Configurable working directory** - Use `dir` to specify where `<schema>.yml` is stored (default: `.db-schemas/`)
+- **Per-schema API keys** - Each schema has its own API key for sync
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -76,24 +106,28 @@ database-schema-spec/
 │       ├── project/
 │       │   ├── manifest.json       # Snapshot manifest schema
 │       │   └── config/
-│       │       ├── base.json       # Common config schema
+│       │       ├── base.json       # Common config schema (with $defs)
 │       │       └── engines/
-│       │           └── postgresql.json  # PostgreSQL connection config
+│       │           └── postgresql.json  # PostgreSQL-specific config (references base.json)
 │       └── engines/
 │           └── postgresql/
-│               └── v15.0/          # Version-specific spec
-│                   ├── spec.json
+│               └── v15.0/          # Version-specific schemas
+│                   ├── tables.json     # Tables array schema (AI-focused)
+│                   ├── snapshot/
+│                   │   ├── stored.json   # Stored snapshot schema
+│                   │   └── working.json  # Working snapshot schema
 │                   └── components/
 └── output/                         # Generated output files
     ├── smap.json                   # Schema map (discovery file)
     ├── manifest.json               # Manifest schema with $id
     ├── config/
-    │   ├── base.json               # Base config with $id
-    │   └── engines/
-    │       └── postgresql.json     # PostgreSQL config with $id
+    │   └── postgresql.json         # Fully-resolved PostgreSQL config (self-contained)
     └── postgresql/
         └── v15.0/
-            └── spec.json           # Fully resolved spec with $id
+            ├── tables.json         # Tables array schema (AI-focused)
+            └── snapshot/
+                ├── stored.json     # Stored snapshot schema (CLI)
+                └── working.json    # Working snapshot schema (CLI)
 ```
 
 ## 🧪 Development
@@ -168,13 +202,16 @@ output/
 ├── smap.json                   # Schema map for discovery
 ├── manifest.json               # Manifest schema
 ├── config/
-│   ├── base.json               # Base config schema
-│   └── engines/
-│       └── postgresql.json     # PostgreSQL config schema
+│   └── postgresql.json         # Fully-resolved PostgreSQL config (self-contained)
 └── postgresql/
     └── v15.0/
-        └── spec.json           # PostgreSQL 15.0 spec
+        ├── tables.json         # Tables array schema (AI-focused)
+        └── snapshot/
+            ├── stored.json     # Stored snapshot schema (CLI)
+            └── working.json    # Working snapshot schema (CLI)
 ```
+
+**Note:** Each engine config file (e.g., `postgresql.json`) is fully resolved with all `$ref` references inlined, making it completely self-contained. This eliminates the need for separate `base.json` and engine-specific files in the output.
 
 ### Schema Map (smap.json)
 
@@ -182,19 +219,24 @@ The schema map provides a structured index of all generated schemas:
 
 ```json
 {
-  "project": {
-    "manifest": "https://example.com/schemas/manifest.json",
-    "config": {
-      "base": "https://example.com/schemas/config/base.json",
-      "engines": {
-        "postgresql": "https://example.com/schemas/config/engines/postgresql.json"
-      }
-    }
-  },
-  "engines": {
-    "postgresql": {
-      "v15.0": "https://example.com/schemas/postgresql/v15.0/spec.json"
-    }
-  }
+	"project": {
+		"manifest": "https://example.com/schemas/manifest.json",
+		"config": {
+			"postgresql": "https://example.com/schemas/config/postgresql.json"
+		}
+	},
+	"engines": {
+		"postgresql": {
+			"v15.0": {
+				"tables": "https://example.com/schemas/postgresql/v15.0/tables.json",
+				"snapshot": {
+					"stored": "https://example.com/schemas/postgresql/v15.0/snapshot/stored.json",
+					"working": "https://example.com/schemas/postgresql/v15.0/snapshot/working.json"
+				}
+			}
+		}
+	}
 }
 ```
+
+The `config` section maps engine names directly to their fully-resolved schema URLs, making it easy to fetch the appropriate config schema for any supported database engine.

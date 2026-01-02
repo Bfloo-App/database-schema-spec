@@ -1,0 +1,22 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Stored Snapshot",
+	"description": "Schema for stored snapshot files (.bfloo/<schema>/*.yml). Contains the hashable content: description and tables.",
+	"type": "object",
+	"properties": {
+		"description": {
+			"type": "string",
+			"description": "Snapshot description",
+			"maxLength": 256
+		},
+		"tables": {
+			"type": "array",
+			"description": "List of tables in the snapshot",
+			"items": {
+				"$ref": "../components/table.json"
+			}
+		}
+	},
+	"required": ["tables"],
+	"additionalProperties": false
+}

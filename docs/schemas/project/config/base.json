@@ -1,52 +1,77 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Base Project Configuration",
-  "description": "Schema for the common configuration properties shared across all database engines. This schema is used in conjunction with engine-specific configuration schemas.",
-  "type": "object",
-  "definitions": {
-    "envVarString": {
-      "type": "string",
-      "description": "A string value that may contain environment variable references using ${VAR_NAME} syntax. The CLI resolves these at runtime from the environment or .env file.",
-      "examples": ["${API_KEY}", "literal-value", "${MY_VAR}_suffix"]
-    }
-  },
-  "properties": {
-    "schema_id": {
-      "type": "string",
-      "format": "uuid",
-      "description": "Unique identifier linking this project to the web application. Generated on first `db sync push` if not present."
-    },
-    "database": {
-      "type": "object",
-      "description": "Database engine configuration (version is tracked per-snapshot in manifest.yaml)",
-      "properties": {
-        "engine": {
-          "type": "string",
-          "description": "Database engine name",
-          "enum": ["PostgreSQL"]
-        }
-      },
-      "required": ["engine"],
-      "additionalProperties": false
-    },
-    "api": {
-      "type": "object",
-      "description": "API configuration for web app synchronization",
-      "properties": {
-        "base_url": {
-          "type": "string",
-          "format": "uri",
-          "description": "Base URL for the API endpoint",
-          "default": "https://api.yourapp.com"
-        },
-        "key": {
-          "$ref": "#/definitions/envVarString",
-          "description": "API key for authentication. Supports environment variable references (e.g., ${BFLOO_API_KEY}). The CLI resolves env vars from the environment or a .env file located in the config directory or project root."
-        }
-      },
-      "additionalProperties": false
-    }
-  },
-  "required": ["database"],
-  "additionalProperties": false
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Base Project Configuration",
+	"description": "Schema for the project configuration file (.bfloo/config.yml). Defines all schemas with their API keys, database engines, and environment connections.",
+	"type": "object",
+	"$defs": {
+		"envVarString": {
+			"type": "string",
+			"description": "A string value that may contain environment variable references using ${VAR_NAME} syntax. The CLI resolves these at runtime from the environment or the specified env-file.",
+			"examples": ["${API_KEY}", "literal-value", "${MY_VAR}_suffix"]
+		},
+		"envFilePath": {
+			"type": "string",
+			"description": "Path to an environment file (relative to project root) containing variable definitions. Variables in this file are used to resolve ${VAR_NAME} references. If not specified, defaults to '.env' in the project root.",
+			"default": ".env",
+			"examples": [".env", ".env.production", "config/.env.staging", "envs/dev.env"]
+		},
+		"schemaDefinition": {
+			"type": "object",
+			"description": "Configuration for a single schema",
+			"allOf": [
+				{
+					"properties": {
+						"dir": {
+							"type": "string",
+							"description": "Directory path (relative to project root) where the working schema file (<schema_name>.yml) is stored. Defaults to 'db-schemas' if not specified.",
+							"default": "db-schemas",
+							"examples": ["db-schemas", ".", "./", "schemas", "db/schemas", "src/database"]
+						},
+						"key": {
+							"$ref": "#/$defs/envVarString",
+							"description": "API key for this schema. Supports environment variable references (e.g., ${ORDERS_API_KEY}). Each schema requires its own API key."
+						},
+						"engine": {
+							"type": "string",
+							"description": "Database engine for this schema",
+							"enum": ["PostgreSQL"]
+						},
+						"env-file": {
+							"$ref": "#/$defs/envFilePath",
+							"description": "Default environment file for this schema. Used to resolve ${VAR_NAME} references in the API key and as fallback for environments that don't specify their own env-file."
+						}
+					},
+					"required": ["key", "engine", "envs"]
+				},
+				{
+					"if": {
+						"properties": {
+							"engine": { "const": "PostgreSQL" }
+						},
+						"required": ["engine"]
+					},
+					"then": {
+						"properties": {
+							"envs": {
+								"$ref": "engines/postgresql.json#/$defs/envs"
+							}
+						}
+					}
+				}
+			],
+			"unevaluatedProperties": false
+		}
+	},
+	"properties": {
+		"schemas": {
+			"type": "object",
+			"description": "Map of schema definitions. Each key is a user-defined schema name (e.g., 'orders', 'users', 'analytics').",
+			"additionalProperties": {
+				"$ref": "#/$defs/schemaDefinition"
+			},
+			"minProperties": 1
+		}
+	},
+	"required": ["schemas"],
+	"additionalProperties": false
 }

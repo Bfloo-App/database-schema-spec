@@ -65,33 +65,63 @@ def temp_docs_dir():
     with open(temp_dir / "schemas" / "_registry_.json", "w") as f:
         json.dump(registry, f, indent=2)
 
-    # Create base config schema
+    # Create base config schema with reference to engine-specific envs
     base_config = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "Base Project Configuration",
         "type": "object",
-        "properties": {
-            "schema_id": {"type": "string", "format": "uuid"},
-            "database": {
+        "$defs": {
+            "schemaDefinition": {
                 "type": "object",
-                "properties": {"engine": {"type": "string"}},
-                "required": ["engine"],
-            },
+                "allOf": [
+                    {
+                        "properties": {
+                            "engine": {"type": "string"},
+                        }
+                    },
+                    {
+                        "if": {
+                            "properties": {"engine": {"const": "PostgreSQL"}},
+                            "required": ["engine"],
+                        },
+                        "then": {
+                            "properties": {
+                                "envs": {"$ref": "engines/postgresql.json#/$defs/envs"}
+                            }
+                        },
+                    },
+                    {
+                        "if": {
+                            "properties": {"engine": {"const": "MySQL"}},
+                            "required": ["engine"],
+                        },
+                        "then": {
+                            "properties": {
+                                "envs": {"$ref": "engines/mysql.json#/$defs/envs"}
+                            }
+                        },
+                    },
+                ],
+            }
         },
-        "required": ["database"],
+        "properties": {
+            "schemas": {"additionalProperties": {"$ref": "#/$defs/schemaDefinition"}}
+        },
+        "required": ["schemas"],
     }
 
     with open(temp_dir / "schemas" / "project" / "config" / "base.json", "w") as f:
         json.dump(base_config, f, indent=2)
 
-    # Create PostgreSQL config schema
+    # Create PostgreSQL config schema with $defs/envs
     postgresql_config = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "PostgreSQL Configuration",
         "type": "object",
-        "properties": {
-            "environments": {
+        "$defs": {
+            "envs": {
                 "type": "object",
+                "description": "PostgreSQL environment configurations",
                 "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -104,7 +134,6 @@ def temp_docs_dir():
                 },
             }
         },
-        "required": ["environments"],
     }
 
     with open(
@@ -112,14 +141,15 @@ def temp_docs_dir():
     ) as f:
         json.dump(postgresql_config, f, indent=2)
 
-    # Create MySQL config schema
+    # Create MySQL config schema with $defs/envs
     mysql_config = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "title": "MySQL Configuration",
         "type": "object",
-        "properties": {
-            "environments": {
+        "$defs": {
+            "envs": {
                 "type": "object",
+                "description": "MySQL environment configurations",
                 "additionalProperties": {
                     "type": "object",
                     "properties": {
@@ -132,7 +162,6 @@ def temp_docs_dir():
                 },
             }
         },
-        "required": ["environments"],
     }
 
     with open(
@@ -152,33 +181,89 @@ def temp_docs_dir():
     with open(temp_dir / "schemas" / "project" / "manifest.json", "w") as f:
         json.dump(manifest_schema, f, indent=2)
 
-    # Create PostgreSQL v15.0 spec
-    postgresql_spec = {
+    # Create PostgreSQL v15.0 schemas (tables, snapshot/stored, snapshot/working)
+    postgresql_v15_dir = temp_dir / "schemas" / "engines" / "postgresql" / "v15.0"
+    (postgresql_v15_dir / "snapshot").mkdir(parents=True)
+
+    postgresql_tables = {
         "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": "PostgreSQL 15.0 Schema",
-        "type": "object",
-        "properties": {"name": {"type": "string"}, "tables": {"type": "array"}},
-        "required": ["name"],
+        "title": "PostgreSQL v15.0 Tables Schema",
+        "type": "array",
+        "items": {"type": "object", "properties": {"name": {"type": "string"}}},
     }
 
-    with open(
-        temp_dir / "schemas" / "engines" / "postgresql" / "v15.0" / "spec.json", "w"
-    ) as f:
-        json.dump(postgresql_spec, f, indent=2)
+    with open(postgresql_v15_dir / "tables.json", "w") as f:
+        json.dump(postgresql_tables, f, indent=2)
 
-    # Create MySQL v8.0 spec
-    mysql_spec = {
+    postgresql_stored = {
         "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": "MySQL 8.0 Schema",
+        "title": "Stored Snapshot",
         "type": "object",
-        "properties": {"name": {"type": "string"}, "tables": {"type": "array"}},
-        "required": ["name"],
+        "properties": {
+            "description": {"type": "string"},
+            "tables": {"type": "array"},
+        },
+        "required": ["description", "tables"],
     }
 
-    with open(
-        temp_dir / "schemas" / "engines" / "mysql" / "v8.0" / "spec.json", "w"
-    ) as f:
-        json.dump(mysql_spec, f, indent=2)
+    with open(postgresql_v15_dir / "snapshot" / "stored.json", "w") as f:
+        json.dump(postgresql_stored, f, indent=2)
+
+    postgresql_working = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Working Snapshot",
+        "type": "object",
+        "properties": {
+            "schema": {"type": "object"},
+            "snapshot": {"type": "object"},
+        },
+        "required": ["schema"],
+    }
+
+    with open(postgresql_v15_dir / "snapshot" / "working.json", "w") as f:
+        json.dump(postgresql_working, f, indent=2)
+
+    # Create MySQL v8.0 schemas (tables, snapshot/stored, snapshot/working)
+    mysql_v8_dir = temp_dir / "schemas" / "engines" / "mysql" / "v8.0"
+    (mysql_v8_dir / "snapshot").mkdir(parents=True)
+
+    mysql_tables = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "MySQL 8.0 Tables Schema",
+        "type": "array",
+        "items": {"type": "object", "properties": {"name": {"type": "string"}}},
+    }
+
+    with open(mysql_v8_dir / "tables.json", "w") as f:
+        json.dump(mysql_tables, f, indent=2)
+
+    mysql_stored = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Stored Snapshot",
+        "type": "object",
+        "properties": {
+            "description": {"type": "string"},
+            "tables": {"type": "array"},
+        },
+        "required": ["description", "tables"],
+    }
+
+    with open(mysql_v8_dir / "snapshot" / "stored.json", "w") as f:
+        json.dump(mysql_stored, f, indent=2)
+
+    mysql_working = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Working Snapshot",
+        "type": "object",
+        "properties": {
+            "schema": {"type": "object"},
+            "snapshot": {"type": "object"},
+        },
+        "required": ["schema"],
+    }
+
+    with open(mysql_v8_dir / "snapshot" / "working.json", "w") as f:
+        json.dump(mysql_working, f, indent=2)
 
     yield temp_dir
 
@@ -199,7 +284,7 @@ def postgresql_variant():
     """Standard PostgreSQL variant for testing."""
     return DatabaseVariantSpec(
         engine="postgresql",
-        version="15.0",
+        version="v15.0",
         engine_spec_path="schemas/engines/postgresql/v15.0",
     )
 
@@ -295,7 +380,7 @@ class SchemaTestHelper:
                 {
                     "if": {
                         "properties": {
-                            "database": {"properties": {"version": {"const": "15.0"}}}
+                            "database": {"properties": {"version": {"const": "v15.0"}}}
                         }
                     },
                     "then": {"properties": {"feature2": {"type": "integer"}}},

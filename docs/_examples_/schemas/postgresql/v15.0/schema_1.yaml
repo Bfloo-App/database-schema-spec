@@ -1,71 +1,68 @@
-# Example 1: Simple User Management Schema
-# A minimal schema demonstrating basic table structure with users only.
+# Example 1: User Management Schema (Working Snapshot)
+# File location: db-schemas/users.yml
+# A simple schema with user accounts table.
+# This example omits optional descriptions to show minimal valid structure.
 
-name: "User Management"
-description: "Simple user authentication and profile management"
+schema:
+  name: "User Management"
 
-tables:
-  - id: 1
-    name: users
-    description: "User accounts and authentication data"
-    columns:
-      - id: 1
-        name: id
-        type: serial
-        description: "Primary key"
-        constraints:
-          nullable: false
-      - id: 2
-        name: username
-        type: text
-        description: "Unique username for login"
-        constraints:
-          nullable: false
-          min_length:
-            name: "chk_username_min_len"
-            value: 3
-          max_length:
-            name: "chk_username_max_len"
-            value: 50
-      - id: 3
-        name: email
-        type: text
-        description: "User email address"
-        constraints:
-          nullable: false
-          max_length:
-            name: "chk_email_max_len"
-            value: 255
-      - id: 4
-        name: password_hash
-        type: text
-        description: "Hashed password"
-        constraints:
-          nullable: false
-      - id: 5
-        name: is_active
-        type: boolean
-        description: "Whether the account is active"
-        default: true
-        constraints:
-          nullable: false
-      - id: 6
-        name: created_at
-        type: timestamp
-        description: "Account creation timestamp"
-        default: "current_timestamp"
-        constraints:
-          nullable: false
-    constraints:
-      - id: 1
-        name: "pk_users"
-        type: primary_key
-        columns: ["id"]
-      - id: 2
-        name: "uq_users_username"
-        type: unique
-        columns: ["username"]
-      - id: 3
-        name: "uq_users_email"
-        type: unique
-        columns: ["email"]
+snapshot:
+  label: "v1.0.0"
+  tables:
+    - id: 1
+      name: users
+      columns:
+        - id: 1
+          name: id
+          type: serial
+          constraints:
+            nullable: false
+        - id: 2
+          name: username
+          type: text
+          constraints:
+            nullable: false
+            min_length:
+              name: "chk_username_min_len"
+              value: 3
+            max_length:
+              name: "chk_username_max_len"
+              value: 50
+        - id: 3
+          name: email
+          type: text
+          constraints:
+            nullable: false
+            max_length:
+              name: "chk_email_max_len"
+              value: 255
+        - id: 4
+          name: password_hash
+          type: text
+          constraints:
+            nullable: false
+        - id: 5
+          name: is_active
+          type: boolean
+          default: true
+          constraints:
+            nullable: false
+        - id: 6
+          name: created_at
+          type: timestamp
+          default: "current_timestamp"
+          constraints:
+            nullable: false
+      constraints:
+        - id: 1
+          name: "pk_users"
+          type: primary_key
+          columns: ["id"]
+        - id: 2
+          name: "uq_users_username"
+          type: unique
+          columns: ["username"]
+        - id: 3
+          name: "uq_users_email"
+          type: unique
+          columns: ["email"]

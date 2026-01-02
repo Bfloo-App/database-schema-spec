@@ -1,0 +1,5 @@
+# Example 3: New Schema (Stored Snapshot) - Empty Tables
+# File location: .bfloo/new_project/2024-03-10_v0.0.1.yml
+# Shows a stored snapshot with no tables yet.
+
+tables: []
