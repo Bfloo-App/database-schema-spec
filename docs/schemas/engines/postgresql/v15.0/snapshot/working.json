@@ -1,0 +1,55 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"title": "Working Snapshot",
+	"description": "Schema for working snapshot file (db-schemas/<schema>.yml). Contains schema metadata and current snapshot content.",
+	"type": "object",
+	"properties": {
+		"schema": {
+			"type": "object",
+			"description": "Schema metadata. Editable locally but not synced to remote. Source of truth is the working file after import.",
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "Human-readable schema name",
+					"minLength": 1,
+					"maxLength": 64
+				},
+				"description": {
+					"type": "string",
+					"description": "Schema description",
+					"maxLength": 256
+				}
+			},
+			"required": ["name"],
+			"additionalProperties": false
+		},
+		"snapshot": {
+			"type": "object",
+			"description": "Current snapshot content. The 'label' field is read-only (managed via CLI). The 'description' and 'tables' fields are editable and included in content hash.",
+			"properties": {
+				"label": {
+					"type": "string",
+					"description": "Snapshot version label (read-only, source of truth is manifest)",
+					"minLength": 1,
+					"maxLength": 64
+				},
+				"description": {
+					"type": "string",
+					"description": "Snapshot description (included in content hash)",
+					"maxLength": 256
+				},
+				"tables": {
+					"type": "array",
+					"description": "List of tables in the snapshot (included in content hash)",
+					"items": {
+						"$ref": "../components/table.json"
+					}
+				}
+			},
+			"required": ["label", "tables"],
+			"additionalProperties": false
+		}
+	},
+	"required": ["schema"],
+	"additionalProperties": false
+}

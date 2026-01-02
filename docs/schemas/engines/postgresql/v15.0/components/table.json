@@ -5,6 +5,7 @@
     "id": {
       "type": "integer",
       "description": "Unique local identifier for the table",
+      "minimum": 1,
       "examples": [1, 2, 3, 4, 5]
     },
     "name": {

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from database_schema_spec.core.config import config
+from database_schema_spec.resolution.resolver import JSONRefResolver
 
 
 class OutputManager:
@@ -43,13 +44,20 @@ class OutputManager:
                 f"Failed to create output directory {self.output_dir}: {e}"
             ) from e
 
-    def write_schema(self, schema: dict[str, Any], engine: str, version: str) -> Path:
-        """Write a resolved schema to the appropriate output file.
+    def write_engine_schema(
+        self,
+        schema: dict[str, Any],
+        engine: str,
+        version: str,
+        schema_type: str,
+    ) -> Path:
+        """Write a resolved engine schema to the appropriate output file.
 
         Args:
             schema: Fully resolved schema to write
             engine: Database engine name
             version: Database version
+            schema_type: Type of schema ('tables', 'snapshot/stored', 'snapshot/working')
 
         Returns:
             Path where the file was written
@@ -57,7 +65,7 @@ class OutputManager:
         Raises:
             PermissionError: If unable to write file
         """
-        output_path = self._get_output_path(engine, version)
+        output_path = self._get_engine_schema_path(engine, version, schema_type)
 
         try:
             # Create directory structure if it doesn't exist
@@ -74,44 +82,52 @@ class OutputManager:
                 f"Failed to write schema to {output_path}: {e}"
             ) from e
 
-    def _get_output_path(self, engine: str, version: str) -> Path:
-        """Get the output path for a specific engine/version combination.
+    def _get_engine_schema_path(
+        self, engine: str, version: str, schema_type: str
+    ) -> Path:
+        """Get the output path for a specific engine/version/type combination.
 
         Args:
             engine: Database engine name
             version: Database version
+            schema_type: Type of schema ('tables', 'snapshot/stored', 'snapshot/working')
 
         Returns:
-            Path where the spec should be written
+            Path where the schema should be written
         """
-        return self.output_dir / engine.lower() / version / "spec.json"
+        return self.output_dir / engine.lower() / version / f"{schema_type}.json"
 
-    def _get_spec_url(self, engine: str, version: str, base_url: str = "") -> str:
-        """Get the URL for a specific engine/version spec file.
+    def _get_engine_schema_url(
+        self, engine: str, version: str, schema_type: str, base_url: str = ""
+    ) -> str:
+        """Get the URL for a specific engine/version/type schema file.
 
         Args:
             engine: Database engine name
             version: Database version
+            schema_type: Type of schema ('tables', 'snapshot/stored', 'snapshot/working')
             base_url: Base URL to prepend (optional)
 
         Returns:
-            URL pointing to the spec file
+            URL pointing to the schema file
         """
-        relative_path = f"{engine.lower()}/{version}/spec.json"
+        relative_path = f"{engine.lower()}/{version}/{schema_type}.json"
         if base_url:
             return f"{base_url.rstrip('/')}/{relative_path}"
         return relative_path
 
-    def _generate_engine_map(self, base_url: str = "") -> dict[str, dict[str, str]]:
+    def _generate_engine_map(
+        self, base_url: str = ""
+    ) -> dict[str, dict[str, dict[str, Any]]]:
         """Generate a map of all available engines and versions.
 
         Args:
-            base_url: Base URL to prepend to spec URLs (optional)
+            base_url: Base URL to prepend to schema URLs (optional)
 
         Returns:
-            Dictionary mapping engines to versions to URLs
+            Dictionary mapping engines to versions to schema type URLs
         """
-        engine_map: dict[str, dict[str, str]] = {}
+        engine_map: dict[str, dict[str, dict[str, Any]]] = {}
 
         if not self.output_dir.exists():
             return engine_map
@@ -127,18 +143,46 @@ class OutputManager:
                 and engine_dir.name not in reserved_dirs
             ):
                 engine_name = engine_dir.name
-                versions: dict[str, str] = {}
+                versions: dict[str, dict[str, Any]] = {}
 
                 # Iterate through all version directories for this engine
                 for version_dir in engine_dir.iterdir():
                     if version_dir.is_dir():
-                        spec_file = version_dir / "spec.json"
-                        if spec_file.exists():
+                        tables_file = version_dir / "tables.json"
+                        if tables_file.exists():
                             version_name = version_dir.name
-                            spec_url = self._get_spec_url(
-                                engine_name, version_name, base_url
-                            )
-                            versions[version_name] = spec_url
+                            version_schemas: dict[str, Any] = {
+                                "tables": self._get_engine_schema_url(
+                                    engine_name, version_name, "tables", base_url
+                                ),
+                            }
+
+                            # Check for snapshot schemas
+                            snapshot_dir = version_dir / "snapshot"
+                            if snapshot_dir.is_dir():
+                                snapshot_schemas: dict[str, str] = {}
+                                if (snapshot_dir / "stored.json").exists():
+                                    snapshot_schemas["stored"] = (
+                                        self._get_engine_schema_url(
+                                            engine_name,
+                                            version_name,
+                                            "snapshot/stored",
+                                            base_url,
+                                        )
+                                    )
+                                if (snapshot_dir / "working.json").exists():
+                                    snapshot_schemas["working"] = (
+                                        self._get_engine_schema_url(
+                                            engine_name,
+                                            version_name,
+                                            "snapshot/working",
+                                            base_url,
+                                        )
+                                    )
+                                if snapshot_schemas:
+                                    version_schemas["snapshot"] = snapshot_schemas
+
+                            versions[version_name] = version_schemas
 
                 # Only add engine if it has at least one version
                 if versions:
@@ -203,20 +247,82 @@ class OutputManager:
                 f"Failed to write project schema to {full_output_path}: {e}"
             ) from e
 
+    def write_resolved_engine_config(
+        self, engine: str, base_config_path: str, base_url: str = ""
+    ) -> Path:
+        """Write a fully-resolved engine config schema.
+
+        Takes the base config schema and resolves all $ref references including
+        engine-specific references (e.g., engines/postgresql.json#/$defs/envs).
+
+        Args:
+            engine: Engine name (e.g., "postgresql")
+            base_config_path: Relative path to base config schema (from docs_dir)
+            base_url: Base URL for $id injection
+
+        Returns:
+            Path where the file was written
+
+        Raises:
+            PermissionError: If unable to write file
+            FileNotFoundError: If source files don't exist
+        """
+        engine_lower = engine.lower()
+        output_path = f"config/{engine_lower}.json"
+        full_output_path = self.output_dir / output_path
+
+        try:
+            # Ensure output directory exists
+            full_output_path.parent.mkdir(parents=True, exist_ok=True)
+
+            # Use the resolver to fully resolve all $ref references
+            resolver = JSONRefResolver(self.docs_dir)
+            resolved_schema = resolver.resolve_file(base_config_path)
+
+            # Update title to be engine-specific
+            if "title" in resolved_schema:
+                resolved_schema["title"] = f"{engine} Project Configuration"
+
+            # Inject $id
+            if base_url:
+                schema_url = f"{base_url.rstrip('/')}/{output_path}"
+                # Ensure $id comes after $schema
+                reordered: dict[str, Any] = {}
+                if "$schema" in resolved_schema:
+                    reordered["$schema"] = resolved_schema["$schema"]
+                reordered["$id"] = schema_url
+                for k, v in resolved_schema.items():
+                    if k not in ("$schema", "$id"):
+                        reordered[k] = v
+                resolved_schema = reordered
+
+            # Write to output
+            with open(full_output_path, "w", encoding="utf-8") as f:
+                json.dump(resolved_schema, f, indent=2, ensure_ascii=False)
+
+            return full_output_path
+
+        except Exception as e:
+            raise PermissionError(
+                f"Failed to write resolved engine config to {full_output_path}: {e}"
+            ) from e
+
     def write_schema_map(self, engines: list[str], base_url: str = "") -> Path:
         """Write the schema map to smap.json in the output root.
 
         The schema map contains:
         - project:
           - manifest: URL to manifest.json schema
-          - config:
-            - base: URL to config/base.json schema
-            - engines: Map of engine name -> config URL
-        - engines: Map of engine -> version -> spec URL
+          - config: Map of engine name -> config URL (fully-resolved per-engine configs)
+        - engines: Map of engine -> version -> schema URLs
+          - tables: URL to tables.json (AI-focused)
+          - snapshot:
+            - stored: URL to snapshot/stored.json (CLI)
+            - working: URL to snapshot/working.json (CLI)
 
         Args:
             engines: List of engine names to include in config mapping
-            base_url: Base URL to prepend to spec URLs (optional)
+            base_url: Base URL to prepend to schema URLs (optional)
 
         Returns:
             Path where the smap.json file was written
@@ -226,11 +332,11 @@ class OutputManager:
         """
         base = base_url.rstrip("/") if base_url else ""
 
-        # Build engine config map
+        # Build engine config map (now directly under config, not config.engines)
         engine_configs: dict[str, str] = {}
         for engine in engines:
             engine_lower = engine.lower()
-            config_path = f"config/engines/{engine_lower}.json"
+            config_path = f"config/{engine_lower}.json"
             engine_configs[engine_lower] = (
                 f"{base}/{config_path}" if base else config_path
             )
@@ -238,10 +344,7 @@ class OutputManager:
         schema_map: dict[str, Any] = {
             "project": {
                 "manifest": f"{base}/manifest.json" if base else "manifest.json",
-                "config": {
-                    "base": f"{base}/config/base.json" if base else "config/base.json",
-                    "engines": engine_configs,
-                },
+                "config": engine_configs,
             },
             "engines": self._generate_engine_map(base_url),
         }

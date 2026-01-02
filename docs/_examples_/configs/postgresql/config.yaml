@@ -1,0 +1,104 @@
+# Example config.yaml for PostgreSQL
+# This file contains project configuration and database connection settings.
+# Place this file at the root of your .bfloo/ directory.
+
+schemas:
+  # Example schema: main application database
+  myapp:
+    # Directory where the schema YAML file is stored (relative to project root)
+    # Defaults to 'db-schemas' if not specified, can be './' or '.' for project root
+    dir: 'db-schemas'
+
+    # API key for web app synchronization
+    # Resolved from the schema-level env-file (defaults to .env)
+    key: '${BFLOO_API_KEY}'
+
+    # Database engine configuration
+    engine: 'PostgreSQL'
+
+    # Default env file for this schema (used for API key and as fallback for envs)
+    # Each environment can override this with its own env-file
+    env-file: '.env'
+
+    # PostgreSQL connection settings per environment
+    # Uses official libpq parameter names
+    # See: https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+    envs:
+      # Production environment - use strict SSL
+      production:
+        # Environment-specific env file for production secrets
+        env-file: '.env.production'
+        host: '${PROD_DB_HOST}'
+        port: 5432
+        dbname: '${PROD_DB_NAME}'
+        target-schema: 'public'
+        user: '${PROD_DB_USER}'
+        password: '${PROD_DB_PASSWORD}'
+        sslmode: 'verify-full'
+        connect_timeout: 10
+
+      # Staging environment - require SSL but less strict verification
+      staging:
+        # Environment-specific env file for staging secrets
+        env-file: '.env.staging'
+        host: '${STAGING_DB_HOST}'
+        port: 5432
+        dbname: '${STAGING_DB_NAME}'
+        target-schema: 'public'
+        user: '${STAGING_DB_USER}'
+        password: '${STAGING_DB_PASSWORD}'
+        sslmode: 'require'
+        connect_timeout: 10
+
+      # Development environment - local database, relaxed settings
+      development:
+        # Uses schema-level env-file (.env) since env-file is not specified
+        host: 'localhost'
+        port: 5432
+        dbname: 'myapp_dev'
+        target-schema: 'public'
+        user: 'postgres'
+        password: '${DEV_DB_PASSWORD}'
+        sslmode: 'prefer'
+        connect_timeout: 5
+
+      # CI/Test environment - ephemeral database for testing
+      test:
+        # No env-file needed - uses hardcoded test values
+        host: 'localhost'
+        port: 5432
+        dbname: 'myapp_test'
+        target-schema: 'public'
+        user: 'postgres'
+        password: 'test_password'
+        sslmode: 'disable'
+        connect_timeout: 5
+
+  # Example schema: analytics database (uses project root for schema file)
+  analytics:
+    # Store schema file in project root instead of default 'db-schemas'
+    dir: './'
+
+    key: '${ANALYTICS_API_KEY}'
+    engine: 'PostgreSQL'
+    env-file: '.env.analytics'
+
+    envs:
+      production:
+        env-file: '.env.analytics.production'
+        host: '${ANALYTICS_DB_HOST}'
+        port: 5432
+        dbname: 'analytics'
+        target-schema: 'reporting'
+        user: '${ANALYTICS_DB_USER}'
+        password: '${ANALYTICS_DB_PASSWORD}'
+        sslmode: 'verify-full'
+
+      development:
+        host: 'localhost'
+        port: 5432
+        dbname: 'analytics_dev'
+        target-schema: 'reporting'
+        user: 'postgres'
+        password: '${DEV_DB_PASSWORD}'
+        sslmode: 'disable'

@@ -24,25 +24,36 @@ class TestSchemaGenerationIntegration:
         # Verify output structure
         assert temp_output_dir.exists()
 
-        # Check for generated schema files
-        postgres_output = temp_output_dir / "postgresql" / "v15.0" / "spec.json"
-        mysql_output = temp_output_dir / "mysql" / "v8.0" / "spec.json"
+        # Check for generated schema files (new structure: tables.json, snapshot/)
+        postgres_tables = temp_output_dir / "postgresql" / "v15.0" / "tables.json"
+        postgres_stored = (
+            temp_output_dir / "postgresql" / "v15.0" / "snapshot" / "stored.json"
+        )
+        postgres_working = (
+            temp_output_dir / "postgresql" / "v15.0" / "snapshot" / "working.json"
+        )
+        mysql_tables = temp_output_dir / "mysql" / "v8.0" / "tables.json"
 
-        assert postgres_output.exists(), "PostgreSQL schema should be generated"
-        assert mysql_output.exists(), "MySQL schema should be generated"
+        assert postgres_tables.exists(), "PostgreSQL tables schema should be generated"
+        assert postgres_stored.exists(), (
+            "PostgreSQL stored snapshot schema should be generated"
+        )
+        assert postgres_working.exists(), (
+            "PostgreSQL working snapshot schema should be generated"
+        )
+        assert mysql_tables.exists(), "MySQL tables schema should be generated"
 
-        # Check for project schemas
-        assert (temp_output_dir / "config" / "base.json").exists()
-        assert (temp_output_dir / "config" / "engines" / "postgresql.json").exists()
-        assert (temp_output_dir / "config" / "engines" / "mysql.json").exists()
+        # Check for project schemas (new structure: config/{engine}.json, no base.json)
+        assert (temp_output_dir / "config" / "postgresql.json").exists()
+        assert (temp_output_dir / "config" / "mysql.json").exists()
         assert (temp_output_dir / "manifest.json").exists()
         assert (temp_output_dir / "smap.json").exists()
 
         # Verify content quality
-        with open(postgres_output) as f:
+        with open(postgres_tables) as f:
             postgres_schema = json.load(f)
 
-        with open(mysql_output) as f:
+        with open(mysql_tables) as f:
             mysql_schema = json.load(f)
 
         # Basic schema validation - check they have $id injected
@@ -86,16 +97,24 @@ class TestSchemaGenerationIntegration:
         # Verify directory structure matches expected pattern
         expected_structure = [
             temp_output_dir / "postgresql" / "v15.0",
+            temp_output_dir / "postgresql" / "v15.0" / "snapshot",
             temp_output_dir / "mysql" / "v8.0",
-            temp_output_dir / "config" / "engines",
+            temp_output_dir / "mysql" / "v8.0" / "snapshot",
+            temp_output_dir / "config",
         ]
 
         for path in expected_structure:
             assert path.exists(), f"Expected directory {path} should exist"
 
-        # Check spec files
-        assert (temp_output_dir / "postgresql" / "v15.0" / "spec.json").exists()
-        assert (temp_output_dir / "mysql" / "v8.0" / "spec.json").exists()
+        # Check new schema files (tables.json, snapshot/stored.json, snapshot/working.json)
+        assert (temp_output_dir / "postgresql" / "v15.0" / "tables.json").exists()
+        assert (
+            temp_output_dir / "postgresql" / "v15.0" / "snapshot" / "stored.json"
+        ).exists()
+        assert (
+            temp_output_dir / "postgresql" / "v15.0" / "snapshot" / "working.json"
+        ).exists()
+        assert (temp_output_dir / "mysql" / "v8.0" / "tables.json").exists()
 
     def test_schema_generation_output_content_validity(
         self, temp_docs_dir, temp_output_dir
@@ -146,20 +165,54 @@ class TestSchemaGenerationIntegration:
         with open(registry_file, "w") as f:
             json.dump(registry, f, indent=2)
 
-        # Create directory and spec for the new variant
+        # Create directory and schemas for the new variant (new structure)
         postgresql_14_dir = (
             temp_docs_dir / "schemas" / "engines" / "postgresql" / "v14.0"
         )
+        postgresql_14_snapshot_dir = postgresql_14_dir / "snapshot"
         postgresql_14_dir.mkdir(parents=True)
+        postgresql_14_snapshot_dir.mkdir(parents=True)
 
-        with open(postgresql_14_dir / "spec.json", "w") as f:
+        # Create tables.json
+        with open(postgresql_14_dir / "tables.json", "w") as f:
             json.dump(
                 {
                     "$schema": "http://json-schema.org/draft-07/schema#",
-                    "title": "PostgreSQL 14.0 Schema",
+                    "title": "PostgreSQL 14.0 Tables Schema",
+                    "type": "array",
+                    "items": {"type": "object"},
+                },
+                f,
+                indent=2,
+            )
+
+        # Create snapshot/stored.json
+        with open(postgresql_14_snapshot_dir / "stored.json", "w") as f:
+            json.dump(
+                {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "title": "Stored Snapshot",
                     "type": "object",
-                    "properties": {"name": {"type": "string"}},
-                    "required": ["name"],
+                    "properties": {
+                        "description": {"type": "string"},
+                        "tables": {"type": "array"},
+                    },
+                },
+                f,
+                indent=2,
+            )
+
+        # Create snapshot/working.json
+        with open(postgresql_14_snapshot_dir / "working.json", "w") as f:
+            json.dump(
+                {
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "title": "Working Snapshot",
+                    "type": "object",
+                    "properties": {
+                        "schema": {"type": "object"},
+                        "snapshot": {"type": "object"},
+                    },
                 },
                 f,
                 indent=2,
@@ -170,10 +223,10 @@ class TestSchemaGenerationIntegration:
         )
         generator.run_for_testing()
 
-        # Should create output for all variants
-        assert (temp_output_dir / "postgresql" / "v15.0" / "spec.json").exists()
-        assert (temp_output_dir / "postgresql" / "v14.0" / "spec.json").exists()
-        assert (temp_output_dir / "mysql" / "v8.0" / "spec.json").exists()
+        # Should create output for all variants (new file structure)
+        assert (temp_output_dir / "postgresql" / "v15.0" / "tables.json").exists()
+        assert (temp_output_dir / "postgresql" / "v14.0" / "tables.json").exists()
+        assert (temp_output_dir / "mysql" / "v8.0" / "tables.json").exists()
 
     def test_schema_generation_schema_map_structure(
         self, temp_docs_dir, temp_output_dir
@@ -197,18 +250,26 @@ class TestSchemaGenerationIntegration:
         # Check project section
         assert "manifest" in smap["project"]
         assert "config" in smap["project"]
-        assert "base" in smap["project"]["config"]
-        assert "engines" in smap["project"]["config"]
 
-        # Check engine configs are present
-        assert "postgresql" in smap["project"]["config"]["engines"]
-        assert "mysql" in smap["project"]["config"]["engines"]
+        # Check engine configs are directly under config (new structure)
+        assert "postgresql" in smap["project"]["config"]
+        assert "mysql" in smap["project"]["config"]
 
-        # Check engine specs are present
+        # Verify config URLs point to config/{engine}.json
+        assert "config/postgresql.json" in smap["project"]["config"]["postgresql"]
+        assert "config/mysql.json" in smap["project"]["config"]["mysql"]
+
+        # Check engine specs are present (new nested structure)
         assert "postgresql" in smap["engines"]
         assert "mysql" in smap["engines"]
         assert "v15.0" in smap["engines"]["postgresql"]
         assert "v8.0" in smap["engines"]["mysql"]
+
+        # Check nested schema types
+        assert "tables" in smap["engines"]["postgresql"]["v15.0"]
+        assert "snapshot" in smap["engines"]["postgresql"]["v15.0"]
+        assert "stored" in smap["engines"]["postgresql"]["v15.0"]["snapshot"]
+        assert "working" in smap["engines"]["postgresql"]["v15.0"]["snapshot"]
 
     def test_schema_generation_performance_with_large_schema(
         self, temp_docs_dir, temp_output_dir
@@ -217,22 +278,30 @@ class TestSchemaGenerationIntegration:
         # Create a large schema with many properties
         large_schema = {
             "$schema": "http://json-schema.org/draft-07/schema#",
-            "type": "object",
-            "properties": {},
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {},
+            },
         }
 
         # Add 100 properties to simulate a large schema
         for i in range(100):
-            large_schema["properties"][f"property_{i}"] = {
+            large_schema["items"]["properties"][f"property_{i}"] = {
                 "type": "string",
                 "description": f"Property {i}",
             }
 
-        # Update the PostgreSQL spec with the large schema
-        spec_file = (
-            temp_docs_dir / "schemas" / "engines" / "postgresql" / "v15.0" / "spec.json"
+        # Update the PostgreSQL tables.json with the large schema
+        tables_file = (
+            temp_docs_dir
+            / "schemas"
+            / "engines"
+            / "postgresql"
+            / "v15.0"
+            / "tables.json"
         )
-        with open(spec_file, "w") as f:
+        with open(tables_file, "w") as f:
             json.dump(large_schema, f, indent=2)
 
         import time
